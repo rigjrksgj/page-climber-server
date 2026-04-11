@@ -1,0 +1,166 @@
+[
+  {
+    "id": "e83b4ff1-3812-4b8b-8e23-1d6fc6b0c6e1",
+    "name": "Custom Level",
+    "author": "bn",
+    "uploadedAt": 1775876136084,
+    "plays": 1,
+    "platforms": [
+      {
+        "x": 120,
+        "y": 320,
+        "width": 60,
+        "height": 80,
+        "isSubplatform": false
+      },
+      {
+        "x": 260,
+        "y": 480,
+        "width": 160,
+        "height": 80,
+        "isSubplatform": false
+      },
+      {
+        "x": 200,
+        "y": 440,
+        "width": 24,
+        "height": 40,
+        "isSubplatform": false
+      },
+      {
+        "x": 260,
+        "y": 260,
+        "width": 40,
+        "height": 40,
+        "isSubplatform": false
+      },
+      {
+        "x": 380,
+        "y": 240,
+        "width": 40,
+        "height": 20,
+        "isSubplatform": false
+      },
+      {
+        "x": 460,
+        "y": 200,
+        "width": 80,
+        "height": 20,
+        "isSubplatform": false
+      },
+      {
+        "x": 340,
+        "y": 160,
+        "width": 24,
+        "height": 20,
+        "isSubplatform": false
+      },
+      {
+        "x": 260,
+        "y": 120,
+        "width": 40,
+        "height": 40,
+        "isSubplatform": false
+      }
+    ],
+    "crates": [],
+    "finish": {
+      "x": 100,
+      "y": 80,
+      "width": 525,
+      "height": 18
+    },
+    "width": 3200,
+    "height": 5600,
+    "start": {
+      "x": 400,
+      "y": 440
+    },
+    "settings": {
+      "speed": 255,
+      "jump": 540
+    }
+  },
+  {
+    "id": "c873e0a2-3687-4305-87b0-6473187cd5a3",
+    "name": "Custom Level",
+    "author": "aad",
+    "uploadedAt": 1775876124165,
+    "plays": 1,
+    "platforms": [
+      {
+        "x": 120,
+        "y": 320,
+        "width": 60,
+        "height": 80,
+        "isSubplatform": false
+      },
+      {
+        "x": 260,
+        "y": 480,
+        "width": 160,
+        "height": 80,
+        "isSubplatform": false
+      },
+      {
+        "x": 200,
+        "y": 440,
+        "width": 24,
+        "height": 40,
+        "isSubplatform": false
+      },
+      {
+        "x": 260,
+        "y": 260,
+        "width": 40,
+        "height": 40,
+        "isSubplatform": false
+      },
+      {
+        "x": 380,
+        "y": 240,
+        "width": 40,
+        "height": 20,
+        "isSubplatform": false
+      },
+      {
+        "x": 460,
+        "y": 200,
+        "width": 80,
+        "height": 20,
+        "isSubplatform": false
+      },
+      {
+        "x": 340,
+        "y": 160,
+        "width": 24,
+        "height": 20,
+        "isSubplatform": false
+      },
+      {
+        "x": 260,
+        "y": 120,
+        "width": 40,
+        "height": 40,
+        "isSubplatform": false
+      }
+    ],
+    "crates": [],
+    "finish": {
+      "x": 100,
+      "y": 80,
+      "width": 525,
+      "height": 18
+    },
+    "width": 3200,
+    "height": 5600,
+    "start": {
+      "x": 400,
+      "y": 440
+    },
+    "settings": {
+      "speed": 255,
+      "jump": 540
+    }
+  }
+]
