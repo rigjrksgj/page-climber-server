@@ -15,7 +15,6 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json({ limit: "512kb" }));
 
-// ── Level DB helpers ──────────────────────────────────────────
 const load = () => {
   try { return JSON.parse(fs.readFileSync(DB, "utf8")); }
   catch { return []; }
@@ -24,7 +23,6 @@ const persist = (levels) => {
   fs.writeFileSync(DB, JSON.stringify(levels, null, 2));
 };
 
-// ── Level routes ──────────────────────────────────────────────
 app.get("/", (req, res) => {
   res.json({ ok: true, service: "page-climber-server" });
 });
@@ -118,7 +116,7 @@ app.get("/leaderboard", (req, res) => {
   const entries = loadLb().slice(0, 20);
   res.json({ entries });
 });
-// ── Multiplayer ───────────────────────────────────────────────
+
 const rooms = {};
 
 const generateCode = () => {
@@ -159,7 +157,7 @@ wss.on("connection", (ws) => {
     if (msg.type === "create") {
       roomCode = generateCode();
       playerId = randomUUID();
-      rooms[roomCode] = { players: {} };
+      rooms[roomCode] = { players: {}, currentLevel: null };
       rooms[roomCode].players[playerId] = {
         ws, x: 0, y: 0,
         name: msg.name || "Player",
@@ -170,26 +168,26 @@ wss.on("connection", (ws) => {
       return;
     }
 
-if (msg.type === "join") {
-  const code = String(msg.room || "").toUpperCase().trim();
-  if (!rooms[code]) {
-    ws.send(JSON.stringify({ type: "error", message: "Room not found" }));
-    return;
-  }
-  roomCode = code;
-  playerId = randomUUID();
-  rooms[roomCode].players[playerId] = {
-    ws, x: 0, y: 0,
-    name: msg.name || "Player",
-    color: msg.color || "#4ade80"
-  };
-  ws.send(JSON.stringify({ type: "welcome", id: playerId, room: roomCode }));
-  if (rooms[roomCode].currentLevel) {
-    ws.send(JSON.stringify({ type: "load-level", level: rooms[roomCode].currentLevel }));
-  }
-  sendSnapshot(rooms[roomCode]);
-  return;
-}
+    if (msg.type === "join") {
+      const code = String(msg.room || "").toUpperCase().trim();
+      if (!rooms[code]) {
+        ws.send(JSON.stringify({ type: "error", message: "Room not found" }));
+        return;
+      }
+      roomCode = code;
+      playerId = randomUUID();
+      rooms[roomCode].players[playerId] = {
+        ws, x: 0, y: 0,
+        name: msg.name || "Player",
+        color: msg.color || "#4ade80"
+      };
+      ws.send(JSON.stringify({ type: "welcome", id: playerId, room: roomCode }));
+      if (rooms[roomCode].currentLevel) {
+        ws.send(JSON.stringify({ type: "load-level", level: rooms[roomCode].currentLevel }));
+      }
+      sendSnapshot(rooms[roomCode]);
+      return;
+    }
 
     if (msg.type === "player-state" && playerId && roomCode && rooms[roomCode]) {
       const player = rooms[roomCode].players[playerId];
@@ -202,15 +200,18 @@ if (msg.type === "join") {
         type: "player-state",
         player: { id: playerId, x: player.x, y: player.y, name: player.name, color: player.color }
       }, playerId);
+      return;
     }
-  });
+
     if (msg.type === "load-level" && playerId && roomCode && rooms[roomCode]) {
       const room = rooms[roomCode];
       const isHost = Object.keys(room.players)[0] === playerId;
       if (!isHost) return;
       room.currentLevel = msg.level;
       broadcast(room, { type: "load-level", level: msg.level }, playerId);
-  }
+      return;
+    }
+  });
 
   ws.on("close", () => {
     if (!playerId || !roomCode || !rooms[roomCode]) return;
@@ -228,7 +229,6 @@ if (msg.type === "join") {
   });
 });
 
-// ── HTTP upgrade → WebSocket ──────────────────────────────────
 server.on("upgrade", (request, socket, head) => {
   wss.handleUpgrade(request, socket, head, (ws) => {
     wss.emit("connection", ws, request);
