@@ -170,23 +170,26 @@ wss.on("connection", (ws) => {
       return;
     }
 
-    if (msg.type === "join") {
-      const code = String(msg.room || "").toUpperCase().trim();
-      if (!rooms[code]) {
-        ws.send(JSON.stringify({ type: "error", message: "Room not found" }));
-        return;
-      }
-      roomCode = code;
-      playerId = randomUUID();
-      rooms[roomCode].players[playerId] = {
-        ws, x: 0, y: 0,
-        name: msg.name || "Player",
-        color: msg.color || "#4ade80"
-      };
-      ws.send(JSON.stringify({ type: "welcome", id: playerId, room: roomCode }));
-      sendSnapshot(rooms[roomCode]);
-      return;
-    }
+if (msg.type === "join") {
+  const code = String(msg.room || "").toUpperCase().trim();
+  if (!rooms[code]) {
+    ws.send(JSON.stringify({ type: "error", message: "Room not found" }));
+    return;
+  }
+  roomCode = code;
+  playerId = randomUUID();
+  rooms[roomCode].players[playerId] = {
+    ws, x: 0, y: 0,
+    name: msg.name || "Player",
+    color: msg.color || "#4ade80"
+  };
+  ws.send(JSON.stringify({ type: "welcome", id: playerId, room: roomCode }));
+  if (rooms[roomCode].currentLevel) {
+    ws.send(JSON.stringify({ type: "load-level", level: rooms[roomCode].currentLevel }));
+  }
+  sendSnapshot(rooms[roomCode]);
+  return;
+}
 
     if (msg.type === "player-state" && playerId && roomCode && rooms[roomCode]) {
       const player = rooms[roomCode].players[playerId];
@@ -201,6 +204,13 @@ wss.on("connection", (ws) => {
       }, playerId);
     }
   });
+    if (msg.type === "load-level" && playerId && roomCode && rooms[roomCode]) {
+      const room = rooms[roomCode];
+      const isHost = Object.keys(room.players)[0] === playerId;
+      if (!isHost) return;
+      room.currentLevel = msg.level;
+      broadcast(room, { type: "load-level", level: msg.level }, playerId);
+  }
 
   ws.on("close", () => {
     if (!playerId || !roomCode || !rooms[roomCode]) return;

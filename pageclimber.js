@@ -122,6 +122,7 @@
     #${ROOT}-hud{left:16px;top:16px;width:340px;padding:12px;transition:width .3s ease,padding .3s ease}
     #${ROOT}-hud.${ROOT}-collapsed{width:36px;padding:8px;overflow:hidden}
     #${ROOT}-hud.${ROOT}-collapsed #${ROOT}-controls,#${ROOT}-hud.${ROOT}-collapsed p,#${ROOT}-hud.${ROOT}-collapsed h1{opacity:0;pointer-events:none;margin:0;height:0;overflow:hidden;transition:opacity .2s ease}
+    #${ROOT}-hud.${ROOT}-collapsed #${ROOT}-toggle-hud{opacity:1;pointer-events:all;position:static;display:block;width:20px;height:20px}
     #${ROOT}-toggle-hud{position:absolute;top:8px;right:8px;width:20px;height:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:14px;line-height:1;background:none;border:none;padding:0;font-family:inherit}
     #${ROOT}-hud h1,#${ROOT}-panel h2{margin:0 0 8px;font-size:14px} #${ROOT}-hud p{margin:4px 0}
     #${ROOT}-controls,.${ROOT}-tabs{display:flex;gap:8px;flex-wrap:wrap} #${ROOT}-controls{margin-top:8px}
@@ -580,6 +581,9 @@
     game.finished = false;
     scanPlatforms(true); renderLevelGeometry(); standOnPlatform(findSpawnPlatform()); spawnCrates(); render();
     say(`Level loaded: ${level.name}`);
+    if (game.multiplayer.socket && game.multiplayer.socket.readyState === WebSocket.OPEN) {
+      game.multiplayer.socket.send(JSON.stringify({ type: "load-level", level: level }));
+    }
     if (panel.classList.contains(`${ROOT}-open`)) openPanel("levels");
     return level;
   };
@@ -622,6 +626,10 @@
         if (player.id !== game.multiplayer.playerId) game.multiplayer.peers[player.id] = player;
       });
       renderPeers(); return;
+    }
+    if (message.type === "load-level") {
+      loadLevel(message.level);
+      return;
     }
     if (message.type === "player-left") { cleanupPeer(message.id); return; }
     if (message.type === "player-state" && message.player?.id !== game.multiplayer.playerId) {
