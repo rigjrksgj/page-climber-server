@@ -98,6 +98,26 @@ app.put("/levels/:id", (req, res) => {
   res.json({ ok: true, id: levels[idx].id });
 });
 
+const LB = "./leaderboard.json";
+const loadLb = () => { try { return JSON.parse(fs.readFileSync(LB, "utf8")); } catch { return []; } };
+const persistLb = (entries) => fs.writeFileSync(LB, JSON.stringify(entries, null, 2));
+
+app.post("/leaderboard", (req, res) => {
+  const { username, completions } = req.body;
+  if (!username || completions === undefined) return res.status(400).json({ error: "Missing fields" });
+  const entries = loadLb();
+  const idx = entries.findIndex((e) => e.username === username);
+  if (idx >= 0) { entries[idx].completions = Math.max(entries[idx].completions, completions); }
+  else { entries.push({ username: String(username).slice(0, 32), completions: Number(completions) || 0 }); }
+  entries.sort((a, b) => b.completions - a.completions);
+  persistLb(entries.slice(0, 100));
+  res.json({ ok: true });
+});
+
+app.get("/leaderboard", (req, res) => {
+  const entries = loadLb().slice(0, 20);
+  res.json({ entries });
+});
 // ── Multiplayer ───────────────────────────────────────────────
 const rooms = {};
 

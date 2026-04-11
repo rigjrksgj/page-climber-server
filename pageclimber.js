@@ -1,6 +1,6 @@
 (() => {
   if (window.PageClimber?.destroy) window.PageClimber.destroy();
-  const API_URL = "http://localhost:3000";
+  const API_URL = "https://page-climber-server.onrender.com";
   const KEY = "page-climber-save-v2";
   const ROOT = "page-climber-root";
   const ITEMS = [];
@@ -34,74 +34,40 @@
   };
 
   const ACH = {
-    "reach-10": "Warm-Up",
-    "reach-25": "Quarter Climber",
-    "reach-50": "Halfway There",
-    "reach-75": "Skyline",
-    "reach-90": "Thin Air",
-    "reach-100": "Roof Walker",
-    finish: "Page Cleared",
-    "crate-1": "First Prize",
-    "crate-10": "Box Breaker",
-    "crate-25": "Loot Spiral",
-    "crate-50": "Treasure Fever",
-    "crate-75": "Crate Constellation",
-    "jump-25": "Hopscotch",
-    "jump-100": "Knees of Steel",
-    "jump-500": "Boing Engine",
-    "site-3": "Web Hopper",
-    "site-10": "Dimension Drifter",
-    "collector-10": "Backpack Starter",
-    "collector-20": "Pocket Full",
-    "collector-60": "Museum Run",
-    "fall-1": "Gravity Check",
-    "fall-10": "Frequent Faller",
-    marathon: "Horizontal Problem",
-    "combo-3": "Air Combo",
-    konami: "Old Internet Magic",
-    "crate-42": "Answer in a Box",
-    "secret-cloud": "Cloud Whisperer",
-    "drop-1": "Trap Door",
-    "drop-50": "Phase Walker",
-    "land-50": "Sticky Shoes",
-    "land-500": "Platform Whisperer",
-    "link-hit-1": "Broken Bookmark",
-    "link-1": "Hyper Hopper",
-    "link-5": "Portal Pogo",
-    "subplatform-25": "Fine Footwork",
-    "achievement-10": "Trophy Shelf",
-    "achievement-25": "Golden Cabinet",
-    "crate-epic": "Epic Taste",
-    "inventory-25": "Bag of Tricks",
-    "skin-3": "Wardrobe Start",
-    "skin-6": "Closet Raid",
-    "near-top-fast": "Speed Browser",
+    "reach-10": "Warm-Up", "reach-25": "Quarter Climber", "reach-50": "Halfway There",
+    "reach-75": "Skyline", "reach-90": "Thin Air", "reach-100": "Roof Walker",
+    finish: "Page Cleared", "crate-1": "First Prize", "crate-10": "Box Breaker",
+    "crate-25": "Loot Spiral", "crate-50": "Treasure Fever", "crate-75": "Crate Constellation",
+    "jump-25": "Hopscotch", "jump-100": "Knees of Steel", "jump-500": "Boing Engine",
+    "site-3": "Web Hopper", "site-10": "Dimension Drifter", "collector-10": "Backpack Starter",
+    "collector-20": "Pocket Full", "collector-60": "Museum Run", "fall-1": "Gravity Check",
+    "fall-10": "Frequent Faller", marathon: "Horizontal Problem", "combo-3": "Air Combo",
+    konami: "Old Internet Magic", "crate-42": "Answer in a Box", "secret-cloud": "Cloud Whisperer",
+    "drop-1": "Trap Door", "drop-50": "Phase Walker", "land-50": "Sticky Shoes",
+    "land-500": "Platform Whisperer", "link-hit-1": "Broken Bookmark", "link-1": "Hyper Hopper",
+    "link-5": "Portal Pogo", "subplatform-25": "Fine Footwork", "achievement-10": "Trophy Shelf",
+    "achievement-25": "Golden Cabinet", "crate-epic": "Epic Taste", "inventory-25": "Bag of Tricks",
+    "skin-3": "Wardrobe Start", "skin-6": "Closet Raid", "near-top-fast": "Speed Browser",
     "secret-hover": "Hover Detective"
   };
 
   function fresh() {
     return {
-      version: 2,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      version: 2, createdAt: Date.now(), updatedAt: Date.now(),
+      username: "",
       stats: {
         runs: 0, maxHeightPercent: 0, maxHeightPx: 0, cratesOpened: 0, jumps: 0, totalDistance: 0,
-        deaths: 0, drops: 0, landings: 0, subplatformLandings: 0, linksBroken: 0
+        deaths: 0, drops: 0, landings: 0, subplatformLandings: 0, linksBroken: 0, levelCompletions: 0
       },
       permanent: { speed: 255, jump: 540, gravity: 1300, doubleJump: false, crateLuck: 0, dropPower: 0 },
-      inventory: {},
-      achievements: {},
-      unlockedSkins: ["rookie"],
-      currentSkin: "rookie",
-      visitedOrigins: [],
-      panelTab: "inventory"
+      inventory: {}, achievements: {}, unlockedSkins: ["rookie"], currentSkin: "rookie",
+      visitedOrigins: [], panelTab: "inventory"
     };
   }
 
   function merge(base, incoming) {
     return {
-      ...base,
-      ...incoming,
+      ...base, ...incoming,
       stats: { ...base.stats, ...(incoming.stats || {}) },
       permanent: { ...base.permanent, ...(incoming.permanent || {}) },
       inventory: { ...base.inventory, ...(incoming.inventory || {}) },
@@ -115,32 +81,21 @@
     try {
       const raw = localStorage.getItem(KEY);
       return raw ? merge(fresh(), JSON.parse(raw)) : fresh();
-    } catch {
-      return fresh();
-    }
+    } catch { return fresh(); }
   })();
   state.permanent.speed = 255;
   state.permanent.jump = 540;
   state.permanent.gravity = 1300;
+  if (!state.username) state.username = "";
+  if (!state.stats.levelCompletions) state.stats.levelCompletions = 0;
   state.visitedOrigins = [...new Set([...(state.visitedOrigins || []), location.origin])];
 
   const game = {
-    running: true,
-    keys: new Set(),
-    platforms: [],
-    crates: [],
-    customLevel: null,
+    running: true, keys: new Set(), platforms: [], crates: [], customLevel: null,
     multiplayer: { socket: null, room: null, playerId: null, peers: {}, lastSentAt: 0 },
-    linkHits: new WeakMap(),
-    lastFrame: performance.now(),
-    lastScan: 0,
-    coyote: 0,
-    dropTimer: 0,
-    currentPlatform: null,
-    currentHighlight: null,
-    lastLandingSource: null,
-    finished: false,
-    startedAt: Date.now(),
+    linkHits: new WeakMap(), lastFrame: performance.now(), lastScan: 0, coyote: 0,
+    dropTimer: 0, currentPlatform: null, currentHighlight: null, lastLandingSource: null,
+    finished: false, startedAt: Date.now(),
     player: {
       width: 28, height: 38, x: 24, y: 0, vx: 0, vy: 0,
       speed: state.permanent.speed, jump: state.permanent.jump, gravity: state.permanent.gravity,
@@ -149,29 +104,26 @@
     }
   };
 
-  const save = () => {
-    state.updatedAt = Date.now();
-    localStorage.setItem(KEY, JSON.stringify(state));
-  };
+  const save = () => { state.updatedAt = Date.now(); localStorage.setItem(KEY, JSON.stringify(state)); };
 
   const syncPlayer = () => {
-    state.permanent.speed = 255;
-    state.permanent.jump = 540;
-    state.permanent.gravity = 1300;
-    game.player.speed = 255;
-    game.player.jump = 540;
-    game.player.gravity = 1300;
+    state.permanent.speed = 255; state.permanent.jump = 540; state.permanent.gravity = 1300;
+    game.player.speed = 255; game.player.jump = 540; game.player.gravity = 1300;
     game.player.canDoubleJump = !!state.permanent.doubleJump;
-    if (!state.unlockedSkins.includes(state.currentSkin)) {
-      state.currentSkin = state.unlockedSkins[0] || "rookie";
-    }
+    if (!state.unlockedSkins.includes(state.currentSkin)) state.currentSkin = state.unlockedSkins[0] || "rookie";
   };
+
+  const getUsername = () => state.username || "Anonymous";
 
   const style = document.createElement("style");
   style.id = `${ROOT}-style`;
   style.textContent = `
     #${ROOT}-hud,#${ROOT}-panel{position:fixed;z-index:2147483646;color:#f8fafc;font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:rgba(15,23,42,.88);border:1px solid rgba(148,163,184,.35);border-radius:14px;box-shadow:0 14px 40px rgba(15,23,42,.35);backdrop-filter:blur(10px)}
-    #${ROOT}-hud{left:16px;top:16px;width:340px;padding:12px} #${ROOT}-hud h1,#${ROOT}-panel h2{margin:0 0 8px;font-size:14px} #${ROOT}-hud p{margin:4px 0}
+    #${ROOT}-hud{left:16px;top:16px;width:340px;padding:12px;transition:width .3s ease,padding .3s ease}
+    #${ROOT}-hud.${ROOT}-collapsed{width:36px;padding:8px;overflow:hidden}
+    #${ROOT}-hud.${ROOT}-collapsed #${ROOT}-controls,#${ROOT}-hud.${ROOT}-collapsed p,#${ROOT}-hud.${ROOT}-collapsed h1{opacity:0;pointer-events:none;margin:0;height:0;overflow:hidden;transition:opacity .2s ease}
+    #${ROOT}-toggle-hud{position:absolute;top:8px;right:8px;width:20px;height:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:14px;line-height:1;background:none;border:none;padding:0;font-family:inherit}
+    #${ROOT}-hud h1,#${ROOT}-panel h2{margin:0 0 8px;font-size:14px} #${ROOT}-hud p{margin:4px 0}
     #${ROOT}-controls,.${ROOT}-tabs{display:flex;gap:8px;flex-wrap:wrap} #${ROOT}-controls{margin-top:8px}
     .${ROOT}-button{border:1px solid rgba(96,165,250,.5);background:rgba(30,41,59,.9);color:#fff;border-radius:999px;padding:6px 10px;cursor:pointer;font:inherit}
     .${ROOT}-button[disabled]{opacity:.45;cursor:not-allowed}
@@ -200,29 +152,26 @@
     .${ROOT}-crate{position:absolute;width:20px;height:20px;z-index:2147483644;background:linear-gradient(135deg,#f59e0b,#ef4444);border:2px solid rgba(255,255,255,.88);border-radius:6px;box-shadow:0 12px 24px rgba(0,0,0,.22)}
     .${ROOT}-crate::after{content:"?";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font:700 12px/1 ui-monospace,monospace}
     .${ROOT}-link-hit{outline:2px solid rgba(96,165,250,.9);outline-offset:2px}
+    .${ROOT}-input{flex:1;min-width:120px;padding:6px 10px;border-radius:999px;border:1px solid rgba(96,165,250,.5);background:rgba(30,41,59,.9);color:#fff;font:inherit;outline:none}
   `;
   document.head.appendChild(style);
 
   const hud = document.createElement("div");
   hud.id = `${ROOT}-hud`;
-  hud.innerHTML = `<h1>Page Climber</h1><p id="${ROOT}-progress">Height: 0%</p><p id="${ROOT}-stats">Speed: 0 | Jump: 0</p><p id="${ROOT}-skin">Skin: ${state.currentSkin}</p><p id="${ROOT}-crate">Crates: ${state.stats.cratesOpened}</p><p id="${ROOT}-platform">Platform: none</p><p id="${ROOT}-mode">Mode: page</p><p id="${ROOT}-help">I inventory | J achievements | K skins | L levels | S drop | jump on walls</p><div id="${ROOT}-controls"><button class="${ROOT}-button" id="${ROOT}-open-inventory">Inventory</button><button class="${ROOT}-button" id="${ROOT}-open-achievements">Achievements</button><button class="${ROOT}-button" id="${ROOT}-open-skins">Skins</button><button class="${ROOT}-button" id="${ROOT}-open-levels">Levels</button></div>`;
+  hud.innerHTML = `<button id="${ROOT}-toggle-hud" title="Toggle">«</button><h1>Page Climber</h1><p id="${ROOT}-username-display">Player: ${getUsername() || "not set"}</p><p id="${ROOT}-progress">Height: 0%</p><p id="${ROOT}-stats">Speed: 0 | Jump: 0</p><p id="${ROOT}-skin">Skin: ${state.currentSkin}</p><p id="${ROOT}-crate">Crates: ${state.stats.cratesOpened}</p><p id="${ROOT}-platform">Platform: none</p><p id="${ROOT}-mode">Mode: page</p><p id="${ROOT}-help">I inventory | J achievements | K skins | L levels | M multiplayer | S drop</p><div id="${ROOT}-controls"><button class="${ROOT}-button" id="${ROOT}-open-inventory">Inventory</button><button class="${ROOT}-button" id="${ROOT}-open-achievements">Achievements</button><button class="${ROOT}-button" id="${ROOT}-open-skins">Skins</button><button class="${ROOT}-button" id="${ROOT}-open-levels">Levels</button><button class="${ROOT}-button" id="${ROOT}-open-multi">Multiplayer</button><button class="${ROOT}-button" id="${ROOT}-open-profile">Profile</button></div>`;
+
   const panel = document.createElement("div");
   panel.id = `${ROOT}-panel`;
-  panel.innerHTML = `<div class="${ROOT}-tabs"><button class="${ROOT}-button" data-tab="inventory">Inventory</button><button class="${ROOT}-button" data-tab="achievements">Achievements</button><button class="${ROOT}-button" data-tab="skins">Skins</button><button class="${ROOT}-button" data-tab="levels">Levels</button></div><div id="${ROOT}-panel-content"></div>`;
+  panel.innerHTML = `<div class="${ROOT}-tabs"><button class="${ROOT}-button" data-tab="inventory">Inventory</button><button class="${ROOT}-button" data-tab="achievements">Achievements</button><button class="${ROOT}-button" data-tab="skins">Skins</button><button class="${ROOT}-button" data-tab="levels">Levels</button><button class="${ROOT}-button" data-tab="multi">Multiplayer</button><button class="${ROOT}-button" data-tab="leaderboard">Leaderboard</button><button class="${ROOT}-button" data-tab="profile">Profile</button></div><div id="${ROOT}-panel-content"></div>`;
+
   const toast = document.createElement("div");
   toast.id = `${ROOT}-toast`;
-  const levelBg = document.createElement("div");
-  levelBg.id = `${ROOT}-level-bg`;
-  const levelGeo = document.createElement("div");
-  levelGeo.id = `${ROOT}-level-geo`;
-  const remoteLayer = document.createElement("div");
-  remoteLayer.id = `${ROOT}-remote-layer`;
-  const playerEl = document.createElement("div");
-  playerEl.id = `${ROOT}-player`;
-  const finish = document.createElement("div");
-  finish.id = `${ROOT}-finish`;
-  const highlight = document.createElement("div");
-  highlight.id = `${ROOT}-platform-highlight`;
+  const levelBg = document.createElement("div"); levelBg.id = `${ROOT}-level-bg`;
+  const levelGeo = document.createElement("div"); levelGeo.id = `${ROOT}-level-geo`;
+  const remoteLayer = document.createElement("div"); remoteLayer.id = `${ROOT}-remote-layer`;
+  const playerEl = document.createElement("div"); playerEl.id = `${ROOT}-player`;
+  const finish = document.createElement("div"); finish.id = `${ROOT}-finish`;
+  const highlight = document.createElement("div"); highlight.id = `${ROOT}-platform-highlight`;
   document.body.append(hud, panel, toast, levelBg, levelGeo, remoteLayer, playerEl, finish, highlight);
 
   const say = (text) => {
@@ -269,17 +218,11 @@
   };
   const renderLevelGeometry = () => {
     if (!game.customLevel) {
-      levelBg.style.display = "none";
-      levelGeo.style.display = "none";
-      levelGeo.innerHTML = "";
-      return;
+      levelBg.style.display = "none"; levelGeo.style.display = "none"; levelGeo.innerHTML = ""; return;
     }
-    levelBg.style.display = "block";
-    levelGeo.style.display = "block";
-    levelBg.style.width = `${game.customLevel.width}px`;
-    levelBg.style.height = `${game.customLevel.height}px`;
-    levelGeo.style.width = `${game.customLevel.width}px`;
-    levelGeo.style.height = `${game.customLevel.height}px`;
+    levelBg.style.display = "block"; levelGeo.style.display = "block";
+    levelBg.style.width = `${game.customLevel.width}px`; levelBg.style.height = `${game.customLevel.height}px`;
+    levelGeo.style.width = `${game.customLevel.width}px`; levelGeo.style.height = `${game.customLevel.height}px`;
     levelGeo.innerHTML = (game.customLevel.platforms || []).map((platform) => `<div class="${ROOT}-level-platform" style="left:${platform.x}px;top:${platform.y}px;width:${platform.width}px;height:${platform.height}px"></div>`).join("");
   };
   const peerColor = (id) => {
@@ -291,11 +234,16 @@
     const peers = Object.values(game.multiplayer.peers);
     remoteLayer.style.width = `${Math.max(innerWidth, game.customLevel?.width || document.documentElement.clientWidth)}px`;
     remoteLayer.style.height = `${getWorldHeight()}px`;
-    remoteLayer.innerHTML = peers.map((peer) => `<div class="${ROOT}-remote-player" style="left:${peer.x}px;top:${peer.y}px;background:${peer.color || peerColor(peer.id)}"><div class="${ROOT}-remote-label">${peer.name || "Rival"}</div></div>`).join("");
+    remoteLayer.innerHTML = peers.map((peer) => `<div class="${ROOT}-remote-player" style="left:${peer.x}px;top:${peer.y}px;background:${peer.color || peerColor(peer.id)}"><div class="${ROOT}-remote-label">${peer.name || "Player"}</div></div>`).join("");
   };
-  const cleanupPeer = (id) => {
-    delete game.multiplayer.peers[id];
-    renderPeers();
+  const cleanupPeer = (id) => { delete game.multiplayer.peers[id]; renderPeers(); };
+
+  const submitLeaderboard = (username, completions) => {
+    fetch(API_URL + "/leaderboard", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, completions })
+    }).catch(function() {});
   };
 
   const panelHtml = {
@@ -312,6 +260,38 @@
     skins() {
       return `<h2>Skins</h2>${Object.entries(SKINS).map(([id, skin]) => `<div class="${ROOT}-entry"><strong>${skin[0]}</strong><span class="${ROOT}-muted">${state.unlockedSkins.includes(id) ? "Unlocked" : "Locked by " + (skin[2] || "default")}</span><div style="margin-top:8px"><button class="${ROOT}-button" data-skin="${id}" ${state.unlockedSkins.includes(id) ? "" : "disabled"}>Equip</button></div></div>`).join("")}<button class="${ROOT}-button" data-close="1">Close</button>`;
     },
+    profile() {
+      return (
+        '<h2>Profile</h2>' +
+        '<div class="' + ROOT + '-entry">' +
+        '<strong>Username</strong>' +
+        '<span class="' + ROOT + '-muted">This shows up in multiplayer and on the leaderboard.</span>' +
+        '<div style="margin-top:8px;display:flex;gap:8px">' +
+        '<input id="' + ROOT + '-username-input" class="' + ROOT + '-input" placeholder="Enter username" maxlength="20" value="' + (state.username || "") + '">' +
+        '<button class="' + ROOT + '-button" data-action="save-username">Save</button>' +
+        '</div>' +
+        '<span id="' + ROOT + '-username-status" class="' + ROOT + '-muted" style="display:block;margin-top:6px"></span>' +
+        '</div>' +
+        '<div class="' + ROOT + '-entry">' +
+        '<strong>Stats</strong>' +
+        '<span class="' + ROOT + '-muted">Level completions: ' + state.stats.levelCompletions + '</span>' +
+        '<span class="' + ROOT + '-muted">Crates opened: ' + state.stats.cratesOpened + '</span>' +
+        '<span class="' + ROOT + '-muted">Total jumps: ' + state.stats.jumps + '</span>' +
+        '<span class="' + ROOT + '-muted">Runs: ' + state.stats.runs + '</span>' +
+        '</div>' +
+        '<button class="' + ROOT + '-button" data-close="1">Close</button>'
+      );
+    },
+    leaderboard() {
+      return (
+        '<h2>Leaderboard</h2>' +
+        '<div class="' + ROOT + '-entry"><span class="' + ROOT + '-muted">Most level completions across all players.</span>' +
+        '<div style="margin-top:8px"><button class="' + ROOT + '-button" data-action="fetch-leaderboard">Refresh</button></div>' +
+        '</div>' +
+        '<div id="' + ROOT + '-leaderboard-list">Loading...</div>' +
+        '<button class="' + ROOT + '-button" data-close="1">Close</button>'
+      );
+    },
     levels() {
       const active = game.customLevel ? game.customLevel.name : "Page Mode";
       const uploadBlock = game.customLevel ? (
@@ -319,7 +299,7 @@
         '<strong>Share this level</strong>' +
         '<span class="' + ROOT + '-muted">Upload to the server.</span>' +
         '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">' +
-        '<input id="' + ROOT + '-author-input" placeholder="Your name (optional)" style="flex:1;min-width:120px;padding:6px 10px;border-radius:999px;border:1px solid rgba(96,165,250,.5);background:rgba(30,41,59,.9);color:#fff;font:inherit;outline:none">' +
+        '<input id="' + ROOT + '-author-input" class="' + ROOT + '-input" placeholder="Your name (optional)">' +
         '<button class="' + ROOT + '-button" data-action="upload-level">Upload</button>' +
         '</div>' +
         '<span id="' + ROOT + '-upload-status" class="' + ROOT + '-muted" style="display:block;margin-top:6px"></span>' +
@@ -329,14 +309,35 @@
         '<h2>Levels</h2>' +
         '<div class="' + ROOT + '-entry"><strong>Current</strong><span class="' + ROOT + '-muted">' + active + '</span></div>' +
         uploadBlock +
-        '<div class="' + ROOT + '-entry">' +
-        '<strong>Community levels</strong>' +
+        '<div class="' + ROOT + '-entry"><strong>Community levels</strong>' +
         '<span class="' + ROOT + '-muted">Browse and play uploaded levels.</span>' +
         '<div style="margin-top:8px"><button class="' + ROOT + '-button" data-action="fetch-levels">Refresh list</button></div>' +
-        '<div id="' + ROOT + '-level-list" style="margin-top:10px"></div>' +
-        '</div>' +
+        '<div id="' + ROOT + '-level-list" style="margin-top:10px"></div></div>' +
         '<div class="' + ROOT + '-entry"><strong>Load .bnm file</strong><div style="margin-top:8px"><button class="' + ROOT + '-button" data-action="pick-level">Choose File</button></div></div>' +
         '<div class="' + ROOT + '-entry"><strong>Return to page</strong><div style="margin-top:8px"><button class="' + ROOT + '-button" data-action="clear-level"' + (game.customLevel ? '' : ' disabled') + '>Exit level</button></div></div>' +
+        '<button class="' + ROOT + '-button" data-close="1">Close</button>'
+      );
+    },
+    multi() {
+      const connected = !!game.multiplayer.socket;
+      const code = game.multiplayer.room || "";
+      return (
+        '<h2>Multiplayer</h2>' +
+        (connected ?
+          '<div class="' + ROOT + '-entry"><strong>Connected</strong>' +
+          '<span class="' + ROOT + '-muted">Room code: <strong style="color:#fff;font-size:18px;letter-spacing:4px">' + code + '</strong></span>' +
+          '<span class="' + ROOT + '-muted">Share this code with a friend.</span>' +
+          '<div style="margin-top:8px"><button class="' + ROOT + '-button" data-action="mp-leave">Leave room</button></div></div>' :
+          '<div class="' + ROOT + '-entry"><strong>Create room</strong>' +
+          '<span class="' + ROOT + '-muted">Start a new room and share the 4-letter code.</span>' +
+          '<div style="margin-top:8px"><button class="' + ROOT + '-button" data-action="mp-create">Create room</button></div></div>' +
+          '<div class="' + ROOT + '-entry"><strong>Join room</strong>' +
+          '<span class="' + ROOT + '-muted">Enter a 4-letter code to join.</span>' +
+          '<div style="margin-top:8px;display:flex;gap:8px">' +
+          '<input id="' + ROOT + '-room-input" placeholder="XKQZ" maxlength="4" style="width:80px;padding:6px 10px;border-radius:999px;border:1px solid rgba(96,165,250,.5);background:rgba(30,41,59,.9);color:#fff;font:inherit;outline:none;text-transform:uppercase">' +
+          '<button class="' + ROOT + '-button" data-action="mp-join">Join</button></div>' +
+          '<span id="' + ROOT + '-mp-status" class="' + ROOT + '-muted" style="display:block;margin-top:6px"></span></div>'
+        ) +
         '<button class="' + ROOT + '-button" data-close="1">Close</button>'
       );
     }
@@ -353,6 +354,44 @@
     content.querySelectorAll("[data-action='clear-level']").forEach(function(btn) { btn.addEventListener("click", function() { clearLevel(); }); });
     content.querySelectorAll("[data-close]").forEach(function(btn) { btn.addEventListener("click", function() { panel.classList.remove(ROOT + "-open"); }); });
 
+    content.querySelectorAll("[data-action='save-username']").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var input = content.querySelector("#" + ROOT + "-username-input");
+        var statusEl = content.querySelector("#" + ROOT + "-username-status");
+        var val = input ? input.value.trim() : "";
+        if (!val) { if (statusEl) statusEl.textContent = "Please enter a username."; return; }
+        state.username = val;
+        save();
+        if (statusEl) statusEl.textContent = "Saved!";
+        hud.querySelector("#" + ROOT + "-username-display").textContent = "Player: " + val;
+        submitLeaderboard(val, state.stats.levelCompletions);
+        say("Username set to " + val);
+      });
+    });
+
+    var fetchAndRenderLeaderboard = function() {
+      var listEl = content.querySelector("#" + ROOT + "-leaderboard-list");
+      if (!listEl) return;
+      listEl.textContent = "Loading...";
+      fetch(API_URL + "/leaderboard")
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (!data.entries || !data.entries.length) { listEl.textContent = "No entries yet."; return; }
+          listEl.innerHTML = data.entries.map(function(e, i) {
+            return '<div class="' + ROOT + '-entry" style="display:flex;justify-content:space-between;align-items:center">' +
+              '<span style="color:#94a3b8;margin-right:8px">#' + (i + 1) + '</span>' +
+              '<strong style="flex:1">' + e.username + '</strong>' +
+              '<span class="' + ROOT + '-muted">' + e.completions + ' completions</span>' +
+              '</div>';
+          }).join("");
+        })
+        .catch(function() { listEl.textContent = "Server unreachable."; });
+    };
+
+    content.querySelectorAll("[data-action='fetch-leaderboard']").forEach(function(btn) {
+      btn.addEventListener("click", fetchAndRenderLeaderboard);
+    });
+
     var fetchAndRenderLevels = function() {
       var listEl = content.querySelector("#" + ROOT + "-level-list");
       if (!listEl) return;
@@ -365,13 +404,11 @@
             return '<div class="' + ROOT + '-entry" style="margin-bottom:6px">' +
               '<strong>' + l.name + '</strong>' +
               '<span class="' + ROOT + '-muted">by ' + l.author + ' \u00b7 ' + l.platformCount + ' platforms \u00b7 ' + l.plays + ' plays</span>' +
-              '<div style="margin-top:6px"><button class="' + ROOT + '-button" data-load-id="' + l.id + '">Play</button></div>' +
-              '</div>';
+              '<div style="margin-top:6px"><button class="' + ROOT + '-button" data-load-id="' + l.id + '">Play</button></div></div>';
           }).join("");
           listEl.querySelectorAll("[data-load-id]").forEach(function(btn) {
             btn.addEventListener("click", function() {
-              btn.textContent = "Loading...";
-              btn.disabled = true;
+              btn.textContent = "Loading..."; btn.disabled = true;
               fetch(API_URL + "/levels/" + btn.dataset.loadId)
                 .then(function(r) { return r.json(); })
                 .then(function(level) { loadLevel(level); })
@@ -382,15 +419,13 @@
         .catch(function() { listEl.textContent = "Server unreachable."; });
     };
 
-    content.querySelectorAll("[data-action='fetch-levels']").forEach(function(btn) {
-      btn.addEventListener("click", fetchAndRenderLevels);
-    });
+    content.querySelectorAll("[data-action='fetch-levels']").forEach(function(btn) { btn.addEventListener("click", fetchAndRenderLevels); });
 
     content.querySelectorAll("[data-action='upload-level']").forEach(function(btn) {
       btn.addEventListener("click", function() {
         var statusEl = content.querySelector("#" + ROOT + "-upload-status");
         var authorEl = content.querySelector("#" + ROOT + "-author-input");
-        var author = authorEl ? authorEl.value || "Anonymous" : "Anonymous";
+        var author = authorEl ? authorEl.value || getUsername() : getUsername();
         if (!game.customLevel) return;
         statusEl.textContent = "Uploading...";
         fetch(API_URL + "/levels", {
@@ -400,18 +435,27 @@
         })
           .then(function(r) { return r.json(); })
           .then(function(data) {
-            if (data.ok) {
-              statusEl.textContent = "Uploaded! ID: " + data.id;
-              say("Level shared: " + game.customLevel.name);
-            } else {
-              statusEl.textContent = "Error: " + data.error;
-            }
+            if (data.ok) { statusEl.textContent = "Uploaded! ID: " + data.id; say("Level shared: " + game.customLevel.name); }
+            else { statusEl.textContent = "Error: " + data.error; }
           })
           .catch(function() { statusEl.textContent = "Could not reach server."; });
       });
     });
 
+    content.querySelectorAll("[data-action='mp-create']").forEach(function(btn) { btn.addEventListener("click", function() { connectMultiplayer("create"); }); });
+    content.querySelectorAll("[data-action='mp-join']").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var input = content.querySelector("#" + ROOT + "-room-input");
+        var code = input ? input.value.toUpperCase().trim() : "";
+        var statusEl = content.querySelector("#" + ROOT + "-mp-status");
+        if (code.length !== 4) { if (statusEl) statusEl.textContent = "Enter a 4-letter code."; return; }
+        connectMultiplayer("join", code);
+      });
+    });
+    content.querySelectorAll("[data-action='mp-leave']").forEach(function(btn) { btn.addEventListener("click", function() { disconnectMultiplayer(); openPanel("multi"); }); });
+
     if (tab === "levels") fetchAndRenderLevels();
+    if (tab === "leaderboard") fetchAndRenderLeaderboard();
   };
 
   const unlock = (id) => {
@@ -481,8 +525,7 @@
       game.customLevel.crates.forEach((crate, index) => {
         const el = document.createElement("div");
         el.className = `${ROOT}-crate`;
-        el.style.left = `${crate.x}px`;
-        el.style.top = `${crate.y}px`;
+        el.style.left = `${crate.x}px`; el.style.top = `${crate.y}px`;
         document.body.appendChild(el);
         game.crates.push({ x: crate.x, y: crate.y, width: crate.width || 20, height: crate.height || 20, opened: false, el, platform: { source: { tagName: `LEVEL-CRATE-${index}` } } });
       });
@@ -500,8 +543,7 @@
       el.className = `${ROOT}-crate`;
       const x = p.x + Math.max(5, Math.random() * Math.max(5, p.width - 26));
       const y = p.y - 22;
-      el.style.left = `${x}px`;
-      el.style.top = `${y}px`;
+      el.style.left = `${x}px`; el.style.top = `${y}px`;
       document.body.appendChild(el);
       game.crates.push({ x, y, width: 20, height: 20, opened: false, el, platform: p });
     }
@@ -517,8 +559,7 @@
   };
 
   const normalizeLevel = (level) => ({
-    format: "bnm", version: 1,
-    name: level.name || "Custom Level",
+    format: "bnm", version: 1, name: level.name || "Custom Level",
     width: level.width || Math.max(innerWidth, 2400),
     height: level.height || Math.max(innerHeight * 3, 4200),
     start: { x: level.start?.x ?? 24, y: level.start?.y ?? Math.max((level.height || innerHeight * 3) - 80, 120) },
@@ -532,62 +573,61 @@
     const parsed = typeof input === "string" ? JSON.parse(input) : input;
     const level = normalizeLevel(parsed);
     game.customLevel = level;
-    game.currentPlatform = null;
-    game.currentHighlight = null;
-    game.lastLandingSource = null;
-    game.player.x = level.start.x;
-    game.player.y = level.start.y;
-    game.player.vx = 0;
-    game.player.vy = 0;
-    game.player.speed = level.settings.speed;
-    game.player.jump = level.settings.jump;
-    scanPlatforms(true);
-    renderLevelGeometry();
-    standOnPlatform(findSpawnPlatform());
-    spawnCrates();
-    render();
+    game.currentPlatform = null; game.currentHighlight = null; game.lastLandingSource = null;
+    game.player.x = level.start.x; game.player.y = level.start.y;
+    game.player.vx = 0; game.player.vy = 0;
+    game.player.speed = level.settings.speed; game.player.jump = level.settings.jump;
+    game.finished = false;
+    scanPlatforms(true); renderLevelGeometry(); standOnPlatform(findSpawnPlatform()); spawnCrates(); render();
     say(`Level loaded: ${level.name}`);
     if (panel.classList.contains(`${ROOT}-open`)) openPanel("levels");
     return level;
   };
 
   const clearLevel = () => {
-    game.customLevel = null;
-    game.currentPlatform = null;
-    game.currentHighlight = null;
-    game.lastLandingSource = null;
-    syncPlayer();
-    scanPlatforms(true);
-    renderLevelGeometry();
-    standOnPlatform(findSpawnPlatform());
-    spawnCrates();
-    render();
+    game.customLevel = null; game.currentPlatform = null; game.currentHighlight = null;
+    game.lastLandingSource = null; game.finished = false;
+    syncPlayer(); scanPlatforms(true); renderLevelGeometry(); standOnPlatform(findSpawnPlatform()); spawnCrates(); render();
     say("Returned to page mode.");
     if (panel.classList.contains(`${ROOT}-open`)) openPanel("levels");
   };
 
   const pickLevelFile = () => {
     const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".bnm,application/json";
+    input.type = "file"; input.accept = ".bnm,application/json";
     input.addEventListener("change", async () => {
-      const file = input.files?.[0];
-      if (!file) return;
-      const text = await file.text();
-      loadLevel(text);
+      const file = input.files?.[0]; if (!file) return;
+      const text = await file.text(); loadLevel(text);
     });
     input.click();
   };
 
   const handleMultiplayerMessage = (message) => {
-    if (message.type === "welcome") { game.multiplayer.playerId = message.id; say(`Connected to room ${message.room}`); return; }
+    if (message.type === "welcome") {
+      game.multiplayer.playerId = message.id;
+      game.multiplayer.room = message.room;
+      say("Connected! Room code: " + message.room);
+      if (panel.classList.contains(ROOT + "-open")) openPanel("multi");
+      return;
+    }
+    if (message.type === "error") {
+      say("Multiplayer: " + message.message);
+      const statusEl = document.querySelector("#" + ROOT + "-mp-status");
+      if (statusEl) statusEl.textContent = message.message;
+      return;
+    }
     if (message.type === "snapshot") {
       game.multiplayer.peers = {};
-      (message.players || []).forEach((player) => { if (player.id !== game.multiplayer.playerId) game.multiplayer.peers[player.id] = player; });
+      (message.players || []).forEach((player) => {
+        if (player.id !== game.multiplayer.playerId) game.multiplayer.peers[player.id] = player;
+      });
       renderPeers(); return;
     }
     if (message.type === "player-left") { cleanupPeer(message.id); return; }
-    if (message.type === "player-state" && message.player?.id !== game.multiplayer.playerId) { game.multiplayer.peers[message.player.id] = message.player; renderPeers(); }
+    if (message.type === "player-state" && message.player?.id !== game.multiplayer.playerId) {
+      game.multiplayer.peers[message.player.id] = message.player;
+      renderPeers();
+    }
   };
 
   const sendMultiplayerState = (force = false) => {
@@ -596,31 +636,46 @@
     const now = Date.now();
     if (!force && now - game.multiplayer.lastSentAt < 80) return;
     game.multiplayer.lastSentAt = now;
-    socket.send(JSON.stringify({ type: "player-state", player: { id: game.multiplayer.playerId, room: game.multiplayer.room, x: Math.round(game.player.x), y: Math.round(game.player.y), name: state.currentSkin, skin: state.currentSkin, color: SKINS[state.currentSkin]?.[1] || "#4ade80" } }));
+    socket.send(JSON.stringify({
+      type: "player-state",
+      x: Math.round(game.player.x), y: Math.round(game.player.y),
+      name: getUsername(), color: SKINS[state.currentSkin]?.[1] || "#4ade80"
+    }));
   };
 
-  const connectMultiplayer = (url = "ws://localhost:8787", room = "default") => {
+  const connectMultiplayer = (type, roomCode) => {
     disconnectMultiplayer();
-    const socket = new WebSocket(`${url}?room=${encodeURIComponent(room)}`);
+    const wsUrl = API_URL.replace("https://", "wss://").replace("http://", "ws://");
+    const socket = new WebSocket(wsUrl);
     game.multiplayer.socket = socket;
-    game.multiplayer.room = room;
-    socket.addEventListener("open", () => { say(`Multiplayer connected: ${room}`); sendMultiplayerState(true); });
-    socket.addEventListener("message", (event) => { try { handleMultiplayerMessage(JSON.parse(event.data)); } catch (error) { console.warn("Multiplayer parse failed", error); } });
-    socket.addEventListener("close", () => { game.multiplayer.socket = null; game.multiplayer.playerId = null; game.multiplayer.peers = {}; renderPeers(); say("Multiplayer disconnected."); });
-    socket.addEventListener("error", () => say("Multiplayer connection error."));
+    socket.addEventListener("open", function() {
+      socket.send(JSON.stringify({
+        type: type, room: roomCode || undefined,
+        name: getUsername(), color: SKINS[state.currentSkin]?.[1] || "#4ade80"
+      }));
+    });
+    socket.addEventListener("message", function(event) {
+      try { handleMultiplayerMessage(JSON.parse(event.data)); }
+      catch (error) { console.warn("Multiplayer parse failed", error); }
+    });
+    socket.addEventListener("close", function() {
+      game.multiplayer.socket = null; game.multiplayer.playerId = null;
+      game.multiplayer.room = null; game.multiplayer.peers = {};
+      renderPeers(); say("Multiplayer disconnected.");
+      if (panel.classList.contains(ROOT + "-open")) openPanel("multi");
+    });
+    socket.addEventListener("error", function() { say("Multiplayer connection error."); });
   };
 
   const disconnectMultiplayer = () => {
     if (game.multiplayer.socket) { game.multiplayer.socket.close(); game.multiplayer.socket = null; }
-    game.multiplayer.playerId = null;
-    game.multiplayer.peers = {};
-    renderPeers();
+    game.multiplayer.playerId = null; game.multiplayer.room = null;
+    game.multiplayer.peers = {}; renderPeers();
   };
 
   const openCrate = (crate) => {
     if (crate.opened) return;
-    crate.opened = true;
-    crate.el.remove();
+    crate.opened = true; crate.el.remove();
     state.stats.cratesOpened += 1;
     const item = ITEMS[(Math.floor(Math.random() * ITEMS.length) + state.permanent.crateLuck) % ITEMS.length];
     state.inventory[item.id] = (state.inventory[item.id] || 0) + 1;
@@ -632,10 +687,7 @@
 
   const setSkin = (id) => {
     if (!state.unlockedSkins.includes(id)) return false;
-    state.currentSkin = id;
-    save();
-    say(`Skin changed to ${SKINS[id][0]}`);
-    return true;
+    state.currentSkin = id; save(); say(`Skin changed to ${SKINS[id][0]}`); return true;
   };
 
   const breakLink = (platform) => {
@@ -647,8 +699,7 @@
     setTimeout(() => link.classList.remove(`${ROOT}-link-hit`), 350);
     if (hits === 1) unlock("link-hit-1");
     if (hits < 4) return say(`Link cracked ${hits}/4`);
-    state.stats.linksBroken += 1;
-    unlock("link-1");
+    state.stats.linksBroken += 1; unlock("link-1");
     if (state.stats.linksBroken >= 5) unlock("link-5");
     save();
     say(`Link broken: traveling to ${new URL(link.href).hostname}`);
@@ -656,12 +707,17 @@
   };
 
   const updateMilestones = () => {
-    const p = state.stats.maxHeightPercent, c = state.stats.cratesOpened, j = state.stats.jumps, inv = Object.keys(state.inventory).length, a = Object.keys(state.achievements).length, skins = state.unlockedSkins.length, sites = state.visitedOrigins.length;
-    if (p >= 10) unlock("reach-10"); if (p >= 25) unlock("reach-25"); if (p >= 50) unlock("reach-50"); if (p >= 75) unlock("reach-75"); if (p >= 90) unlock("reach-90"); if (p >= 100) unlock("reach-100");
-    if (c >= 1) unlock("crate-1"); if (c >= 10) unlock("crate-10"); if (c >= 25) unlock("crate-25"); if (c >= 50) unlock("crate-50"); if (c >= 75) unlock("crate-75"); if (c === 42) unlock("crate-42");
+    const p = state.stats.maxHeightPercent, c = state.stats.cratesOpened, j = state.stats.jumps,
+      inv = Object.keys(state.inventory).length, a = Object.keys(state.achievements).length,
+      skins = state.unlockedSkins.length, sites = state.visitedOrigins.length;
+    if (p >= 10) unlock("reach-10"); if (p >= 25) unlock("reach-25"); if (p >= 50) unlock("reach-50");
+    if (p >= 75) unlock("reach-75"); if (p >= 90) unlock("reach-90"); if (p >= 100) unlock("reach-100");
+    if (c >= 1) unlock("crate-1"); if (c >= 10) unlock("crate-10"); if (c >= 25) unlock("crate-25");
+    if (c >= 50) unlock("crate-50"); if (c >= 75) unlock("crate-75"); if (c === 42) unlock("crate-42");
     if (j >= 25) unlock("jump-25"); if (j >= 100) unlock("jump-100"); if (j >= 500) unlock("jump-500");
     if (sites >= 3) unlock("site-3"); if (sites >= 10) unlock("site-10");
-    if (inv >= 10) unlock("collector-10"); if (inv >= 20) unlock("collector-20"); if (inv >= 25) unlock("inventory-25"); if (inv >= 60) unlock("collector-60");
+    if (inv >= 10) unlock("collector-10"); if (inv >= 20) unlock("collector-20");
+    if (inv >= 25) unlock("inventory-25"); if (inv >= 60) unlock("collector-60");
     if (state.stats.deaths >= 1) unlock("fall-1"); if (state.stats.deaths >= 10) unlock("fall-10");
     if (state.stats.totalDistance >= 100000) unlock("marathon");
     if (state.stats.drops >= 1) unlock("drop-1"); if (state.stats.drops >= 50) unlock("drop-50");
@@ -672,21 +728,17 @@
   };
 
   const render = () => {
-    playerEl.style.left = `${game.player.x}px`;
-    playerEl.style.top = `${game.player.y}px`;
+    playerEl.style.left = `${game.player.x}px`; playerEl.style.top = `${game.player.y}px`;
     playerEl.style.background = SKINS[state.currentSkin]?.[1] || SKINS.rookie[1];
     playerEl.style.transform = `scaleX(${game.player.facing})`;
     playerEl.classList.toggle(`${ROOT}-run`, game.player.onGround && Math.abs(game.player.vx) > 5);
     playerEl.classList.toggle(`${ROOT}-jump`, !game.player.onGround);
     if (game.currentPlatform) {
       highlight.style.display = "block";
-      highlight.style.left = `${game.currentPlatform.x}px`;
-      highlight.style.top = `${game.currentPlatform.y}px`;
+      highlight.style.left = `${game.currentPlatform.x}px`; highlight.style.top = `${game.currentPlatform.y}px`;
       highlight.style.width = `${game.currentPlatform.width}px`;
       highlight.style.height = `${Math.max(8, Math.min(game.currentPlatform.height, 28))}px`;
-    } else {
-      highlight.style.display = "none";
-    }
+    } else { highlight.style.display = "none"; }
     hud.querySelector(`#${ROOT}-progress`).textContent = `Height: ${state.stats.maxHeightPercent}%`;
     hud.querySelector(`#${ROOT}-stats`).textContent = `Speed: ${Math.round(game.player.speed)} | Jump: ${Math.round(game.player.jump)} | Gravity: ${Math.round(game.player.gravity)}`;
     hud.querySelector(`#${ROOT}-skin`).textContent = `Skin: ${SKINS[state.currentSkin]?.[0] || state.currentSkin}`;
@@ -696,45 +748,26 @@
   };
 
   const jump = () => {
-    if (!game.player.onGround && game.player.wallSide !== 0 && game.player.wallTimer > 0) {
-      game.player.vy = -game.player.jump * 0.96;
-      game.player.vx = game.player.speed * 0.95 * -game.player.wallSide;
-      game.player.wallTimer = 0;
-      game.player.wallSide = 0;
-      state.stats.jumps += 1;
-      unlock("combo-3");
-      return save();
-    }
     if (game.player.onGround || game.coyote > 0) {
-      game.player.vy = -game.player.jump;
-      game.player.onGround = false;
-      game.coyote = 0;
+      game.player.vy = -game.player.jump; game.player.onGround = false; game.coyote = 0;
       game.player.jumpsLeft = game.player.canDoubleJump ? 1 : 0;
-      state.stats.jumps += 1;
-      return save();
+      state.stats.jumps += 1; return save();
     }
     if (game.player.jumpsLeft > 0) {
-      game.player.vy = -game.player.jump * 0.92;
-      game.player.jumpsLeft -= 1;
-      state.stats.jumps += 1;
-      unlock("combo-3");
-      save();
+      game.player.vy = -game.player.jump * 0.92; game.player.jumpsLeft -= 1;
+      state.stats.jumps += 1; unlock("combo-3"); save();
     }
   };
 
   const drop = () => {
     game.dropTimer = 220 + state.permanent.dropPower * 40;
-    game.player.onGround = false;
-    game.player.vy = Math.max(game.player.vy, 150);
-    state.stats.drops += 1;
-    save();
+    game.player.onGround = false; game.player.vy = Math.max(game.player.vy, 150);
+    state.stats.drops += 1; save();
   };
 
   const step = (dt) => {
     const p = game.player;
     const prev = { x: p.x, y: p.y };
-    const prevRight = prev.x + p.width;
-    const prevLeft = prev.x;
     const left = game.keys.has("a") || game.keys.has("arrowleft");
     const right = game.keys.has("d") || game.keys.has("arrowright");
     p.vx = 0;
@@ -743,11 +776,9 @@
     if (p.vx !== 0) p.facing = p.vx > 0 ? 1 : -1;
     p.vy += p.gravity * dt;
     if (game.keys.has("s") || game.keys.has("arrowdown")) p.vy += (220 + state.permanent.dropPower * 20) * dt;
-    p.x += p.vx * dt;
-    p.y += p.vy * dt;
+    p.x += p.vx * dt; p.y += p.vy * dt;
     p.x = Math.max(0, Math.min(p.x, Math.max(innerWidth, document.documentElement.clientWidth) - p.width));
-    p.onGround = false;
-    p.wallSide = 0;
+    p.onGround = false; p.wallSide = 0; p.wallTimer = 0;
     const previousPlatform = game.currentPlatform;
     game.currentPlatform = null;
     const prevBottom = prev.y + p.height;
@@ -762,32 +793,18 @@
       if (game.dropTimer > 0 && game.currentHighlight?.source === platform.source) continue;
       if (p.vy >= 0 && prevBottom <= platform.y && nextBottom >= platform.y) landings.push(platform);
     }
-    for (const platform of game.platforms) {
-      const overlapY = p.y + p.height > platform.y + 6 && p.y < platform.y + platform.height - 2;
-      if (!overlapY) continue;
-      const nextLeft = p.x;
-      const nextRight = p.x + p.width;
-      const hitLeftWall = p.vx > 0 && prevRight <= platform.x && nextRight >= platform.x;
-      const hitRightWall = p.vx < 0 && prevLeft >= platform.x + platform.width && nextLeft <= platform.x + platform.width;
-      if (hitLeftWall) { p.x = platform.x - p.width; p.vx = 0; p.wallSide = 1; }
-      else if (hitRightWall) { p.x = platform.x + platform.width; p.vx = 0; p.wallSide = -1; }
-    }
-    if (!p.onGround && p.wallSide !== 0 && p.vy > 0) { p.vy = Math.min(p.vy, 180); p.wallTimer = 140; }
-    else { p.wallTimer = Math.max(0, p.wallTimer - dt * 1000); }
+    game.coyote = p.onGround ? 90 : Math.max(0, game.coyote - dt * 1000);
+    game.dropTimer = Math.max(0, game.dropTimer - dt * 1000);
     landings.sort((a, b) => platformCenterDistance(a, p.x, p.width) - platformCenterDistance(b, p.x, p.width) || a.width - b.width);
     const platform = game.currentPlatform || landings[0];
     if (!game.currentPlatform && platform && game.dropTimer <= 0) {
-      standOnPlatform(platform);
-      p.wallSide = 0;
-      p.wallTimer = 0;
+      standOnPlatform(platform); p.wallSide = 0; p.wallTimer = 0;
       state.stats.landings += 1;
       if (platform.isSubplatform) state.stats.subplatformLandings += 1;
       if (game.lastLandingSource !== platform.source) breakLink(platform);
       game.lastLandingSource = platform.source;
     }
     if (!platform) game.lastLandingSource = null;
-    game.coyote = p.onGround ? 90 : Math.max(0, game.coyote - dt * 1000);
-    game.dropTimer = Math.max(0, game.dropTimer - dt * 1000);
     const worldHeight = getWorldHeight();
     if (p.y + p.height > worldHeight) { p.y = worldHeight - p.height; p.vy = 0; p.onGround = true; state.stats.deaths += 1; }
     const climbed = Math.max(0, worldHeight - (p.y + p.height));
@@ -796,8 +813,17 @@
     state.stats.maxHeightPercent = Math.max(state.stats.maxHeightPercent, percent);
     state.stats.totalDistance += Math.abs(p.vx * dt);
     if (percent >= 90 && Date.now() - game.startedAt < 35000) unlock("near-top-fast");
-    if (percent >= 100 && !game.finished) { game.finished = true; unlock("finish"); say("Top reached. You beat this page."); }
-    if (game.customLevel?.finish && hit(rect(), game.customLevel.finish) && !game.finished) { game.finished = true; unlock("finish"); say("Level cleared: " + game.customLevel.name); }
+    if (percent >= 100 && !game.finished) {
+      game.finished = true; unlock("finish"); say("Top reached. You beat this page.");
+    }
+    if (game.customLevel?.finish && hit(rect(), game.customLevel.finish) && !game.finished) {
+      game.finished = true;
+      state.stats.levelCompletions += 1;
+      unlock("finish");
+      say("Level cleared: " + game.customLevel.name);
+      if (state.username) submitLeaderboard(state.username, state.stats.levelCompletions);
+      save();
+    }
     for (const crate of game.crates) if (!crate.opened && hit(rect(), crate)) openCrate(crate);
     updateMilestones();
     const target = Math.max(0, p.y - innerHeight * 0.6);
@@ -808,10 +834,7 @@
     if (!game.running) return;
     const dt = Math.min(0.032, (now - game.lastFrame) / 1000);
     game.lastFrame = now;
-    scanPlatforms(false);
-    step(dt);
-    sendMultiplayerState(false);
-    render();
+    scanPlatforms(false); step(dt); sendMultiplayerState(false); render();
     requestAnimationFrame(loop);
   };
 
@@ -826,6 +849,7 @@
     if (key === "j") { openPanel("achievements"); event.preventDefault(); }
     if (key === "k") { openPanel("skins"); event.preventDefault(); }
     if (key === "l") { openPanel("levels"); event.preventDefault(); }
+    if (key === "m") { openPanel("multi"); event.preventDefault(); }
     const combo = (window.__pcSecret = [...(window.__pcSecret || []), event.key].slice(-14)).join(",");
     if (combo.includes("ArrowUp,ArrowUp,ArrowDown,ArrowDown,ArrowLeft,ArrowRight,ArrowLeft,ArrowRight,b,a")) unlock("konami");
     if (combo.toLowerCase().includes("h,o,v,e,r")) unlock("secret-hover");
@@ -836,16 +860,23 @@
   document.addEventListener("keyup", onKeyUp, true);
   addEventListener("resize", () => { scanPlatforms(true); spawnCrates(); });
   addEventListener("scroll", () => scanPlatforms(false), { passive: true });
+
+  hud.querySelector(`#${ROOT}-toggle-hud`).addEventListener("click", () => {
+    const collapsed = hud.classList.toggle(ROOT + "-collapsed");
+    hud.querySelector("#" + ROOT + "-toggle-hud").textContent = collapsed ? "»" : "«";
+  });
   hud.querySelector(`#${ROOT}-open-inventory`).addEventListener("click", () => openPanel("inventory"));
   hud.querySelector(`#${ROOT}-open-achievements`).addEventListener("click", () => openPanel("achievements"));
   hud.querySelector(`#${ROOT}-open-skins`).addEventListener("click", () => openPanel("skins"));
   hud.querySelector(`#${ROOT}-open-levels`).addEventListener("click", () => openPanel("levels"));
+  hud.querySelector(`#${ROOT}-open-multi`).addEventListener("click", () => openPanel("multi"));
+  hud.querySelector(`#${ROOT}-open-profile`).addEventListener("click", () => openPanel("profile"));
   panel.querySelectorAll("[data-tab]").forEach((btn) => btn.addEventListener("click", () => openPanel(btn.dataset.tab)));
 
   const exportSave = () => {
     const payload = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
     navigator.clipboard?.writeText(payload).catch(() => {});
-    say("Save exported. It was also copied to the clipboard when allowed.");
+    say("Save exported to clipboard.");
     return payload;
   };
   const importSave = (payload) => {
@@ -853,10 +884,7 @@
     Object.keys(state).forEach((k) => delete state[k]);
     Object.assign(state, next);
     state.visitedOrigins = [...new Set([...(state.visitedOrigins || []), location.origin])];
-    syncPlayer();
-    save();
-    render();
-    say("Save imported.");
+    syncPlayer(); save(); render(); say("Save imported.");
   };
   const secret = (name) => {
     const v = String(name).toLowerCase();
@@ -868,17 +896,15 @@
     const next = fresh();
     Object.keys(state).forEach((k) => delete state[k]);
     Object.assign(state, next);
-    syncPlayer();
-    save();
-    say("Save reset.");
+    syncPlayer(); save(); say("Save reset.");
   };
   const destroy = () => {
-    game.running = false;
-    disconnectMultiplayer();
+    game.running = false; disconnectMultiplayer();
     game.crates.forEach((c) => c.el.remove());
     document.removeEventListener("keydown", onKeyDown, true);
     document.removeEventListener("keyup", onKeyUp, true);
-    style.remove(); hud.remove(); panel.remove(); toast.remove(); levelBg.remove(); levelGeo.remove(); remoteLayer.remove(); playerEl.remove(); finish.remove(); highlight.remove();
+    style.remove(); hud.remove(); panel.remove(); toast.remove(); levelBg.remove();
+    levelGeo.remove(); remoteLayer.remove(); playerEl.remove(); finish.remove(); highlight.remove();
     delete window.PageClimber;
   };
 
@@ -886,12 +912,8 @@
   game.player.y = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, innerHeight) - game.player.height - 24;
   state.stats.runs += 1;
   save();
-  scanPlatforms(true);
-  renderLevelGeometry();
-  standOnPlatform(findSpawnPlatform());
-  spawnCrates();
-  render();
-  say("Page Climber started. I inventory, J achievements, K skins, S drop.");
+  scanPlatforms(true); renderLevelGeometry(); standOnPlatform(findSpawnPlatform()); spawnCrates(); render();
+  say("Page Climber started. I inventory, J achievements, K skins, L levels, M multiplayer.");
   requestAnimationFrame(loop);
   window.PageClimber = {
     exportSave, importSave, loadLevel, clearLevel, pickLevelFile,
