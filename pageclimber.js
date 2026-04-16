@@ -2324,7 +2324,7 @@
   }
 });
 
-  // Periodic ban check - verify user isn't banned every 30 seconds
+  // Periodic ban check - verify user isn't banned every 10 seconds
   setInterval(async () => {
     if (!authToken || !currentUser) return;
     try {
@@ -2332,23 +2332,21 @@
         method: "POST",
         headers: { "Authorization": "Bearer " + authToken }
       });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.user && data.user.isBanned && !currentUser.isBanned) {
-          // User was just banned!
-          say("You have been banned from the server.");
-          currentUser.isBanned = true;
-          // Close websocket if connected
-          if (window.PageClimber?.ws) {
-            try { window.PageClimber.ws.close(); } catch {}
-          }
-          logout();
-          setTimeout(() => location.reload(), 2000);
+      if (res.status === 403) {
+        // User was banned!
+        say("You have been banned from the server.");
+        // Close websocket if connected
+        if (window.PageClimber?.ws) {
+          try { window.PageClimber.ws.close(); } catch {}
         }
+        logout();
+        setTimeout(() => location.reload(), 2000);
+      } else if (res.ok) {
+        const data = await res.json();
         currentUser = data.user;
       }
     } catch {}
-  }, 30000);
+  }, 10000);
 
   const exportSave = () => {
     const payload = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
