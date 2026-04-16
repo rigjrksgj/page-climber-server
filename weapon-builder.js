@@ -8,6 +8,153 @@
     paintColor: "#ff4040", paintSize: 4, paintMode: "draw",
     pixels: {}, textureLayer: true,
     lore: { description: "", flavorText: "", rarity: "common", faction: "", origin: "", unlockCondition: "" },
+    appliedAddons: [],
+    defaultAddons: [
+      // GUNS - Optics (20 items)
+      { name: "Laser Sight", id: "laser_sight", stat: "accuracy", value: 5, rarity: "common", type: "gun" },
+      { name: "Red Dot", id: "red_dot", stat: "accuracy", value: 8, rarity: "common", type: "gun" },
+      { name: "Holographic Sight", id: "holo_sight", stat: "accuracy", value: 15, rarity: "rare", type: "gun" },
+      { name: "ACOG Scope", id: "acog_scope", stat: "range", value: 100, rarity: "epic", type: "gun" },
+      { name: "Thermal Scope", id: "thermal_scope", stat: "range", value: 50, rarity: "rare", type: "gun" },
+      { name: "Night Vision Scope", id: "night_vision", stat: "range", value: 75, rarity: "epic", type: "gun" },
+      { name: "Rifleman Scope", id: "rifleman_scope", stat: "range", value: 75, rarity: "uncommon", type: "gun" },
+      { name: "Fiber Optic Sight", id: "fiber_optic", stat: "accuracy", value: 12, rarity: "uncommon", type: "gun" },
+      { name: "Tritium Sight", id: "tritium_sight", stat: "accuracy", value: 10, rarity: "uncommon", type: "gun" },
+      { name: "Magnified Optic", id: "mag_optic", stat: "range", value: 60, rarity: "uncommon", type: "gun" },
+      { name: "Aperture Sight", id: "aperture_sight", stat: "accuracy", value: 7, rarity: "common", type: "gun" },
+      { name: "Ghost Ring Sight", id: "ghost_ring", stat: "accuracy", value: 9, rarity: "uncommon", type: "gun" },
+      { name: "Prism Scope", id: "prism_scope", stat: "accuracy", value: 20, rarity: "rare", type: "gun" },
+      { name: "Hybrid Sight", id: "hybrid_sight", stat: "accuracy", value: 18, rarity: "rare", type: "gun" },
+      { name: "Elliptical Sight", id: "elliptical_sight", stat: "accuracy", value: 14, rarity: "uncommon", type: "gun" },
+      { name: "Combat Sight", id: "combat_sight", stat: "accuracy", value: 11, rarity: "common", type: "gun" },
+      { name: "Reflex Sight", id: "reflex_sight", stat: "accuracy", value: 13, rarity: "uncommon", type: "gun" },
+      { name: "Pixel Scope", id: "pixel_scope", stat: "accuracy", value: 25, rarity: "epic", type: "gun" },
+      { name: "Quantum Sight", id: "quantum_sight", stat: "accuracy", value: 30, rarity: "epic", type: "gun" },
+      
+      // GUNS - Grips & Handling (15 items)
+      { name: "Foregrip", id: "foregrip", stat: "recoil", value: -3, rarity: "common", type: "gun" },
+      { name: "Vertical Grip", id: "vert_grip", stat: "recoil", value: -5, rarity: "uncommon", type: "gun" },
+      { name: "Angled Grip", id: "angled_grip", stat: "fireRate", value: 2, rarity: "uncommon", type: "gun" },
+      { name: "Ergonomic Grip", id: "ergo_grip", stat: "recoil", value: -4, rarity: "common", type: "gun" },
+      { name: "Stubby Grip", id: "stubby_grip", stat: "spread", value: -2, rarity: "uncommon", type: "gun" },
+      { name: "Tactical Grip", id: "tactical_grip", stat: "recoil", value: -6, rarity: "rare", type: "gun" },
+      { name: "Pistol Grip", id: "pistol_grip", stat: "accuracy", value: 4, rarity: "common", type: "gun" },
+      { name: "Bipod", id: "bipod", stat: "stability", value: 20, rarity: "uncommon", type: "gun" },
+      { name: "Assault Bipod", id: "assault_bipod", stat: "stability", value: 25, rarity: "rare", type: "gun" },
+      { name: "Monopod", id: "monopod", stat: "stability", value: 15, rarity: "uncommon", type: "gun" },
+      { name: "Hand Stop", id: "hand_stop", stat: "recoil", value: -2, rarity: "common", type: "gun" },
+      { name: "Magazine Rod", id: "mag_rod", stat: "fireRate", value: 1, rarity: "common", type: "gun" },
+      { name: "Thumb Rest", id: "thumb_rest", stat: "accuracy", value: 6, rarity: "common", type: "gun" },
+      { name: "Pressure Pad", id: "pressure_pad", stat: "fireRate", value: 3, rarity: "uncommon", type: "gun" },
+      { name: "Ergonomic Pad", id: "ergo_pad", stat: "recoil", value: -7, rarity: "rare", type: "gun" },
+      
+      // GUNS - Muzzles & Barrels (20 items)
+      { name: "Suppressor", id: "suppressor", stat: "damage", value: -2, rarity: "rare", type: "gun" },
+      { name: "Muzzle Brake", id: "muzzle_brake", stat: "recoil", value: -8, rarity: "rare", type: "gun" },
+      { name: "Flash Hider", id: "flash_hider", stat: "stealth", value: 15, rarity: "uncommon", type: "gun" },
+      { name: "Compensator", id: "compensator", stat: "spread", value: -5, rarity: "rare", type: "gun" },
+      { name: "Linear Comp", id: "linear_comp", stat: "recoil", value: -10, rarity: "epic", type: "gun" },
+      { name: "Enforcer Muzzle", id: "enforcer_muzzle", stat: "damage", value: 5, rarity: "rare", type: "gun" },
+      { name: "Blast Diverter", id: "blast_diverter", stat: "recoil", value: -9, rarity: "epic", type: "gun" },
+      { name: "Exotic Muzzle", id: "exotic_muzzle", stat: "damage", value: 10, rarity: "epic", type: "gun" },
+      { name: "Quantum Barrel", id: "quantum_barrel", stat: "range", value: 120, rarity: "epic", type: "gun" },
+      { name: "Extended Barrel", id: "extended_barrel", stat: "range", value: 40, rarity: "uncommon", type: "gun" },
+      { name: "Lightweight Barrel", id: "lightweight_barrel", stat: "fireRate", value: 4, rarity: "uncommon", type: "gun" },
+      { name: "Heavy Barrel", id: "heavy_barrel", stat: "stability", value: 18, rarity: "uncommon", type: "gun" },
+      { name: "Precision Barrel", id: "precision_barrel", stat: "accuracy", value: 16, rarity: "rare", type: "gun" },
+      { name: "Archangel Barrel", id: "archangel_barrel", stat: "damage", value: 8, rarity: "rare", type: "gun" },
+      { name: "Inferno Barrel", id: "inferno_barrel", stat: "damage", value: 15, rarity: "epic", type: "gun" },
+      { name: "Frostbite Barrel", id: "frostbite_barrel", stat: "fireRate", value: 6, rarity: "epic", type: "gun" },
+      { name: "Plasma Barrel", id: "plasma_barrel", stat: "range", value: 140, rarity: "epic", type: "gun" },
+      { name: "Titanium Barrel", id: "titanium_barrel", stat: "durability", value: 50, rarity: "rare", type: "gun" },
+      { name: "Carbide Barrel", id: "carbide_barrel", stat: "accuracy", value: 22, rarity: "rare", type: "gun" },
+      { name: "Venom Barrel", id: "venom_barrel", stat: "damage", value: 12, rarity: "rare", type: "gun" },
+      
+      // GUNS - Stocks & Ammo (15 items)
+      { name: "Tactical Stock", id: "stock_tactical", stat: "stability", value: 15, rarity: "common", type: "gun" },
+      { name: "Sniper Stock", id: "stock_sniper", stat: "stability", value: 25, rarity: "rare", type: "gun" },
+      { name: "Collapsible Stock", id: "stock_collapsible", stat: "weight", value: -3, rarity: "common", type: "gun" },
+      { name: "SAS Stock", id: "stock_sas", stat: "recoil", value: -4, rarity: "uncommon", type: "gun" },
+      { name: "Extended Mag", id: "mag_extended", stat: "ammo", value: 15, rarity: "uncommon", type: "gun" },
+      { name: "Drum Mag", id: "mag_drum", stat: "ammo", value: 30, rarity: "rare", type: "gun" },
+      { name: "Fast Mag", id: "mag_fast_reload", stat: "reloadTime", value: -0.5, rarity: "uncommon", type: "gun" },
+      { name: "Quad Mag", id: "mag_quad", stat: "ammo", value: 50, rarity: "epic", type: "gun" },
+      { name: "STANAG Mag", id: "stanag_mag", stat: "ammo", value: 12, rarity: "common", type: "gun" },
+      { name: "Hollow Point Mag", id: "hollow_point", stat: "damage", value: 6, rarity: "uncommon", type: "gun" },
+      { name: "Armor Piercing", id: "armor_piercing", stat: "pierceChance", value: 30, rarity: "rare", type: "gun" },
+      { name: "Incendiary Round", id: "incendiary", stat: "burnEffect", value: 20, rarity: "rare", type: "gun" },
+      { name: "Explosive Round", id: "explosive_round", stat: "explosionRadius", value: 60, rarity: "epic", type: "gun" },
+      { name: "Tracer Round", id: "tracer_round", stat: "visibility", value: 40, rarity: "uncommon", type: "gun" },
+      { name: "Cryo Round", id: "cryo_round", stat: "freezeEffect", value: 25, rarity: "rare", type: "gun" },
+      
+      // SWORDS - Blades & Edges (15 items)
+      { name: "Monomolecular Edge", id: "mono_edge", stat: "bladeSharp", value: 30, rarity: "epic", type: "sword" },
+      { name: "Serrated Edge", id: "serrated_edge", stat: "bleedsEffect", value: 20, rarity: "uncommon", type: "sword" },
+      { name: "Curved Blade", id: "curved_blade", stat: "swingSpeed", value: 5, rarity: "uncommon", type: "sword" },
+      { name: "Straight Blade", id: "straight_blade", stat: "damage", value: 8, rarity: "common", type: "sword" },
+      { name: "Plasma Edge", id: "plasma_edge", stat: "damage", value: 20, rarity: "epic", type: "sword" },
+      { name: "Frost Blade", id: "frost_blade", stat: "freezeChance", value: 35, rarity: "rare", type: "sword" },
+      { name: "Inferno Blade", id: "inferno_blade", stat: "burnChance", value: 35, rarity: "rare", type: "sword" },
+      { name: "Venom Blade", id: "venom_blade", stat: "poisonDps", value: 15, rarity: "rare", type: "sword" },
+      { name: "Thunder Blade", id: "thunder_blade", stat: "shockChance", value: 40, rarity: "epic", type: "sword" },
+      { name: "Shadow Blade", id: "shadow_blade", stat: "critChance", value: 25, rarity: "rare", type: "sword" },
+      { name: "Diamond Edge", id: "diamond_edge", stat: "hardness", value: 50, rarity: "epic", type: "sword" },
+      { name: "Obsidian Edge", id: "obsidian_edge", stat: "bladeSharp", value: 25, rarity: "rare", type: "sword" },
+      { name: "Silk Blade", id: "silk_blade", stat: "swingSpeed", value: 8, rarity: "rare", type: "sword" },
+      { name: "Titanium Reinforcement", id: "titanium_reinforce", stat: "durability", value: 60, rarity: "rare", type: "sword" },
+      { name: "Chaotic Blade", id: "chaotic_blade", stat: "unpredictability", value: 45, rarity: "epic", type: "sword" },
+      
+      // SWORDS - Hilts & Handles (12 items)
+      { name: "Leather Grip", id: "leather_grip", stat: "control", value: 10, rarity: "common", type: "sword" },
+      { name: "Runed Hilt", id: "runed_hilt", stat: "enchantment", value: 20, rarity: "rare", type: "sword" },
+      { name: "Blessed Grip", id: "blessed_grip", stat: "holiness", value: 15, rarity: "uncommon", type: "sword" },
+      { name: "Soul Hilt", id: "soul_hilt", stat: "drain", value: 30, rarity: "epic", type: "sword" },
+      { name: "Adaptive Grip", id: "adaptive_grip", stat: "control", value: 18, rarity: "rare", type: "sword" },
+      { name: "Guardian Hilt", id: "guardian_hilt", stat: "blockPower", value: 40, rarity: "rare", type: "sword" },
+      { name: "Void Grip", id: "void_grip", stat: "emptiness", value: 25, rarity: "rare", type: "sword" },
+      { name: "Diamond Grip", id: "diamond_grip", stat: "luxury", value: 50, rarity: "epic", type: "sword" },
+      { name: "Comfortable Grip", id: "comfortable_grip", stat: "control", value: 12, rarity: "uncommon", type: "sword" },
+      { name: "Wraith Grip", id: "wraith_grip", stat: "ghostliness", value: 35, rarity: "epic", type: "sword" },
+      { name: "Mystic Grip", id: "mystic_grip", stat: "magicPower", value: 28, rarity: "rare", type: "sword" },
+      { name: "Iron Grip", id: "iron_grip", stat: "strength", value: 20, rarity: "uncommon", type: "sword" },
+      
+      // ABILITIES - Mods & Enhancers (18 items)
+      { name: "Amplifier Core", id: "amplifier_core", stat: "damage", value: 25, rarity: "rare", type: "ability" },
+      { name: "Haste Rune", id: "haste_rune", stat: "castTime", value: -0.3, rarity: "uncommon", type: "ability" },
+      { name: "Extended Range Module", id: "extended_range", stat: "radius", value: 80, rarity: "rare", type: "ability" },
+      { name: "Duration Matrix", id: "duration_matrix", stat: "duration", value: 5, rarity: "uncommon", type: "ability" },
+      { name: "Crit Modifier", id: "crit_modifier", stat: "critChance", value: 35, rarity: "rare", type: "ability" },
+      { name: "Chain Accelerator", id: "chain_accelerator", stat: "chainTargets", value: 5, rarity: "rare", type: "ability" },
+      { name: "Cooldown Reducer", id: "cooldown_reducer", stat: "cooldown", value: -2, rarity: "uncommon", type: "ability" },
+      { name: "Mana Conduit", id: "mana_conduit", stat: "efficiency", value: 30, rarity: "uncommon", type: "ability" },
+      { name: "Overcharge Device", id: "overcharge", stat: "power", value: 50, rarity: "epic", type: "ability" },
+      { name: "Resonance Crystal", id: "resonance_crystal", stat: "area", value: 120, rarity: "epic", type: "ability" },
+      { name: "Entropy Surge", id: "entropy_surge", stat: "chaos", value: 40, rarity: "rare", type: "ability" },
+      { name: "Void Tuner", id: "void_tuner", stat: "power", value: 35, rarity: "rare", type: "ability" },
+      { name: "Ascension Gem", id: "ascension_gem", stat: "transcendence", value: 60, rarity: "epic", type: "ability" },
+      { name: "Stellar Nexus", id: "stellar_nexus", stat: "cosmicPower", value: 70, rarity: "epic", type: "ability" },
+      { name: "Quantum Fluctuator", id: "quantum_flux", stat: "unpredictability", value: 50, rarity: "epic", type: "ability" },
+      { name: "Prism Splitter", id: "prism_splitter", stat: "splitDamage", value: 45, rarity: "rare", type: "ability" },
+      { name: "Temporal Accelerant", id: "temporal_accel", stat: "speed", value: 55, rarity: "epic", type: "ability" },
+      { name: "Cascade Module", id: "cascade_module", stat: "chainReaction", value: 65, rarity: "epic", type: "ability" },
+      
+      // THROWABLES - Enhancements (15 items)
+      { name: "Fuse Reducer", id: "fuse_reducer", stat: "fuseTime", value: -0.5, rarity: "uncommon", type: "throwable" },
+      { name: "Shrapnel Pack", id: "shrapnel_pack", stat: "explosionRadius", value: 100, rarity: "rare", type: "throwable" },
+      { name: "Impact Detonator", id: "impact_detonator", stat: "triggerSpeed", value: -0.1, rarity: "uncommon", type: "throwable" },
+      { name: "Sticky Adhesive", id: "sticky_adhesive", stat: "stickiness", value: 90, rarity: "uncommon", type: "throwable" },
+      { name: "Bounce Enhancer", id: "bounce_enhancer", stat: "bounceCount", value: 8, rarity: "uncommon", type: "throwable" },
+      { name: "Reinforced Casing", id: "reinforced_casing", stat: "durability", value: 50, rarity: "uncommon", type: "throwable" },
+      { name: "Plasma Charge", id: "plasma_charge", stat: "damage", value: 30, rarity: "rare", type: "throwable" },
+      { name: "Cryo Detonator", id: "cryo_detonator", stat: "freezeRadius", value: 80, rarity: "rare", type: "throwable" },
+      { name: "Incendiary Charge", id: "incendiary_charge", stat: "burnRadius", value: 90, rarity: "rare", type: "throwable" },
+      { name: "Toxin Disperser", id: "toxin_disperser", stat: "poisonCloud", value: 100, rarity: "rare", type: "throwable" },
+      { name: "Volt Inducer", id: "volt_inducer", stat: "shockRadius", value: 70, rarity: "rare", type: "throwable" },
+      { name: "Sonic Emitter", id: "sonic_emitter", stat: "sound", value: 150, rarity: "epic", type: "throwable" },
+      { name: "Void Fragment", id: "void_fragment", stat: "annihilation", value: 200, rarity: "epic", type: "throwable" },
+      { name: "Stellar Burst", id: "stellar_burst", stat: "brilliance", value: 180, rarity: "epic", type: "throwable" },
+      { name: "Chaos Catalyst", id: "chaos_catalyst", stat: "chaos", value: 160, rarity: "epic", type: "throwable" }
+    ],
     stats: {
       damage: 25, range: 300, speed: 400, knockback: 8, weight: 5,
       critChance: 10, critMulti: 2.0, lifesteal: 0, pierce: 0,
@@ -163,6 +310,61 @@
   `;
   document.head.appendChild(styleEl);
 
+  // Load addons from localStorage (from Page Climber) + default addons
+  const loadAddons = () => {
+    try {
+      const raw = localStorage.getItem("page-climber-save-v2");
+      let unlockedAddons = [];
+      if (raw) {
+        const save = JSON.parse(raw);
+        unlockedAddons = save.addons || [];
+      }
+      // Combine unlocked addons with defaults, filter by weapon type, remove duplicates
+      const allAddons = [...unlockedAddons, ...state.defaultAddons];
+      const seen = new Set();
+      return allAddons.filter(addon => {
+        if (!addon || !addon.id) return false;
+        if (seen.has(addon.id)) return false;
+        seen.add(addon.id);
+        if (!addon.type) return true; // universal addons
+        return addon.type === state.type || addon.type === "universal";
+      });
+    } catch { return state.defaultAddons.filter(addon => {
+      if (!addon.type) return true;
+      return addon.type === state.type || addon.type === "universal";
+    }); }
+  };
+
+  const availableAddons = loadAddons();
+
+  const applyAddon = (addon) => {
+    if (!addon || !addon.stat) return;
+    
+    const valueToApply = addon.value || 0;
+    const statName = addon.stat;
+    
+    // Map addon stat names to weapon builder stat names
+    const statMapping = {
+      "accuracy": null,  // Visual only
+      "range": "range",
+      "stability": null, // Visual only
+      "recoil": "recoil",
+      "fireRate": "fireRate",
+      "damage": "damage",
+      "stealth": null,   // Visual only
+      "spread": "spread",
+      "weight": "weight",
+      "modularity": null, // Visual only
+      "ammo": "ammo",
+      "reloadTime": "reloadTime"
+    };
+    
+    const mappedStat = statMapping[statName];
+    if (mappedStat && state.stats[mappedStat] !== undefined) {
+      state.stats[mappedStat] += valueToApply;
+    }
+  };
+
   // Build shell
   const overlay = document.createElement("div");
   overlay.id = `${ROOT}-overlay`;
@@ -178,6 +380,7 @@
       </div>
       <button class="${ROOT}-btn" id="${ROOT}-import-btn">Import .wpn</button>
       <button class="${ROOT}-btn success" id="${ROOT}-export-btn">Export .wpn</button>
+      <button class="${ROOT}-btn success" id="${ROOT}-save-game-btn">Save to Game</button>
       <button class="${ROOT}-btn" id="${ROOT}-copy-btn">Copy JSON</button>
       <button class="${ROOT}-close" id="${ROOT}-close-btn">✕</button>
     </div>
@@ -189,6 +392,7 @@
         <div class="${ROOT}-sidetab" data-tab="effects">✨ Effects</div>
         <div class="${ROOT}-sidetab" data-tab="animation">▶ Animation</div>
         <div class="${ROOT}-sidetab" data-tab="texture">🖌 Texture</div>
+        <div class="${ROOT}-sidetab" data-tab="addons">🔧 Addons</div>
         <div class="${ROOT}-sidetab" data-tab="lore">📖 Lore</div>
       </div>
       <div class="${ROOT}-content" id="${ROOT}-content"></div>
@@ -564,6 +768,51 @@
           <textarea class="${ROOT}-textinput" data-key="flavorText" data-sec="lore" rows="3" placeholder="Shown in tooltip as italic text...">${l.flavorText}</textarea>
         </div>
       `;
+    },
+    addons() {
+      const addonList = loadAddons();
+      const rarityColors = { common: "#94a3b8", uncommon: "#4ade80", rare: "#60a5fa", epic: "#f59e0b" };
+      
+      return `
+        <div class="${ROOT}-section">
+          <div class="${ROOT}-section-title">Available Addons (${addonList.length})</div>
+          <div style="font-size:9px;color:#7a9aaf;margin-bottom:12px;">Showing addons for: <strong>${state.type.toUpperCase()}</strong></div>
+          ${addonList.length === 0 ? `
+            <div class="${ROOT}-tip">No ${state.type} addons collected yet. Play Page Climber to collect lootboxes and open them to get addons!</div>
+          ` : `
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              ${addonList.map((addon, idx) => `
+                <div style="padding:10px;background:rgba(${rarityColors[addon.rarity] === '#94a3b8' ? '148,163,184' : rarityColors[addon.rarity] === '#4ade80' ? '74,222,128' : rarityColors[addon.rarity] === '#60a5fa' ? '96,165,250' : '245,158,11'},0.15);border:2px solid ${rarityColors[addon.rarity] || '#60a5fa'};border-radius:6px;cursor:pointer;transition:all .2s;" data-addon-idx="${idx}">
+                  <div style="font-weight:bold;color:${rarityColors[addon.rarity] || '#e2f0ff'};margin-bottom:4px;">${addon.name}</div>
+                  <div style="font-size:8px;color:#6a8aaf;margin-bottom:4px;">
+                    <div>${addon.stat}: ${addon.value > 0 ? '+' : ''}${addon.value}</div>
+                    <div style="text-transform:uppercase;font-weight:bold;margin-top:2px;color:${rarityColors[addon.rarity] || '#94a3b8'}">${addon.rarity}</div>
+                  </div>
+                  <button class="${ROOT}-btn" style="width:100%;margin-top:6px;padding:4px;font-size:8px;" data-apply-addon="${idx}">APPLY</button>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </div>
+        <div class="${ROOT}-section">
+          <div class="${ROOT}-section-title">Applied Addons (${state.appliedAddons.length})</div>
+          ${state.appliedAddons.length === 0 ? `
+            <div class="${ROOT}-tip">No addons applied yet. Click APPLY on an addon above!</div>
+          ` : `
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              ${state.appliedAddons.map((addon, idx) => `
+                <div style="padding:8px;background:rgba(76,175,80,0.15);border:1px solid rgba(76,175,80,0.4);border-radius:4px;display:flex;justify-content:space-between;align-items:center;">
+                  <div style="font-size:10px;">
+                    <div style="color:#b8e6b8;font-weight:bold;">${addon.name}</div>
+                    <div style="color:#8ab88a;font-size:9px;margin-top:2px;">${addon.stat}: ${addon.value > 0 ? '+' : ''}${addon.value}</div>
+                  </div>
+                  <button class="${ROOT}-btn danger" style="padding:3px 8px;font-size:8px;" data-remove-addon="${idx}">REMOVE</button>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </div>
+      `;
     }
   };
 
@@ -625,6 +874,38 @@
     contentEl.querySelectorAll('[data-sec="lore"]').forEach(el => {
       el.addEventListener('input', () => { state.lore[el.dataset.key] = el.value; });
     });
+    
+    // Addon application
+    contentEl.querySelectorAll('[data-apply-addon]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.applyAddon);
+        const addon = availableAddons[idx];
+        if (addon && !state.appliedAddons.find(a => a.id === addon.id)) {
+          state.appliedAddons.push(addon);
+          applyAddon(addon);
+          render();
+          drawPreview();
+          updateSummary();
+        }
+      });
+    });
+    
+    // Addon removal
+    contentEl.querySelectorAll('[data-remove-addon]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.removeAddon);
+        const removed = state.appliedAddons.splice(idx, 1);
+        // Reverse the addon effect (subtract the bonus)
+        if (removed[0]) {
+          removed[0].value = -removed[0].value;
+          applyAddon(removed[0]);
+        }
+        render();
+        drawPreview();
+        updateSummary();
+      });
+    });
+    
     // Anim tabs
     contentEl.querySelectorAll(`.${ROOT}-anim-tab`).forEach(btn => {
       btn.addEventListener('click', () => { state.animTab = btn.dataset.anim; state.selectedFrame = 0; render(); });
@@ -1009,6 +1290,13 @@
   $('import-btn').addEventListener('click',()=>{
     const inp=document.createElement('input');inp.type='file';inp.accept='.wpn,application/json';
     inp.addEventListener('change',async()=>{const f=inp.files?.[0];if(!f)return;importWpn(await f.text());});inp.click();
+  });
+  $('save-game-btn').addEventListener('click',()=>{
+    if(!window.PageClimber?.saveWeapon){alert('Page Climber game not found. Make sure it\'s running in another tab/window.');return;}
+    const wpn={format:'wpn',version:1,name:state.name,type:state.type,stats:{...state.stats},appearance:{...state.appearance},effects:{...state.effects},animations:state.animations,pixels:state.pixels,lore:state.lore};
+    if(window.PageClimber.saveWeapon(wpn)){
+      const b=$('save-game-btn');b.textContent='Saved!';setTimeout(()=>b.textContent='Save to Game',1500);
+    }else{alert('Failed to save weapon.');}
   });
   $('copy-btn').addEventListener('click',()=>{
     const wpn={format:'wpn',version:1,name:state.name,type:state.type,stats:{...state.stats},appearance:{...state.appearance},effects:{...state.effects},animations:state.animations,pixels:state.pixels,lore:state.lore};

@@ -51,6 +51,166 @@
     "secret-hover": "Hover Detective"
   };
 
+  // ── Weapon Addons ─────────────────────────────────────────────
+  const ADDON_TYPES = [
+    // GUNS - Optics (20 items)
+    { name: "Laser Sight", id: "laser_sight", stat: "accuracy", value: 5, rarity: "common", type: "gun" },
+    { name: "Red Dot", id: "red_dot", stat: "accuracy", value: 8, rarity: "common", type: "gun" },
+    { name: "Holographic Sight", id: "holo_sight", stat: "accuracy", value: 15, rarity: "rare", type: "gun" },
+    { name: "ACOG Scope", id: "acog_scope", stat: "range", value: 100, rarity: "epic", type: "gun" },
+    { name: "Thermal Scope", id: "thermal_scope", stat: "range", value: 50, rarity: "rare", type: "gun" },
+    { name: "Thermal Scope", id: "thermal_scope", stat: "range", value: 50, rarity: "rare", type: "gun" },
+    { name: "Night Vision Scope", id: "night_vision", stat: "range", value: 75, rarity: "epic", type: "gun" },
+    { name: "Rifleman Scope", id: "rifleman_scope", stat: "range", value: 75, rarity: "uncommon", type: "gun" },
+    { name: "Fiber Optic Sight", id: "fiber_optic", stat: "accuracy", value: 12, rarity: "uncommon", type: "gun" },
+    { name: "Tritium Sight", id: "tritium_sight", stat: "accuracy", value: 10, rarity: "uncommon", type: "gun" },
+    { name: "Magnified Optic", id: "mag_optic", stat: "range", value: 60, rarity: "uncommon", type: "gun" },
+    { name: "Aperture Sight", id: "aperture_sight", stat: "accuracy", value: 7, rarity: "common", type: "gun" },
+    { name: "Ghost Ring Sight", id: "ghost_ring", stat: "accuracy", value: 9, rarity: "uncommon", type: "gun" },
+    { name: "Prism Scope", id: "prism_scope", stat: "accuracy", value: 20, rarity: "rare", type: "gun" },
+    { name: "Hybrid Sight", id: "hybrid_sight", stat: "accuracy", value: 18, rarity: "rare", type: "gun" },
+    { name: "Elliptical Sight", id: "elliptical_sight", stat: "accuracy", value: 14, rarity: "uncommon", type: "gun" },
+    { name: "Combat Sight", id: "combat_sight", stat: "accuracy", value: 11, rarity: "common", type: "gun" },
+    { name: "Reflex Sight", id: "reflex_sight", stat: "accuracy", value: 13, rarity: "uncommon", type: "gun" },
+    { name: "Pixel Scope", id: "pixel_scope", stat: "accuracy", value: 25, rarity: "epic", type: "gun" },
+    { name: "Quantum Sight", id: "quantum_sight", stat: "accuracy", value: 30, rarity: "epic", type: "gun" },
+    
+    // GUNS - Grips & Handling (15 items)
+    { name: "Foregrip", id: "foregrip", stat: "recoil", value: -3, rarity: "common", type: "gun" },
+    { name: "Vertical Grip", id: "vert_grip", stat: "recoil", value: -5, rarity: "uncommon", type: "gun" },
+    { name: "Angled Grip", id: "angled_grip", stat: "fireRate", value: 2, rarity: "uncommon", type: "gun" },
+    { name: "Ergonomic Grip", id: "ergo_grip", stat: "recoil", value: -4, rarity: "common", type: "gun" },
+    { name: "Stubby Grip", id: "stubby_grip", stat: "spread", value: -2, rarity: "uncommon", type: "gun" },
+    { name: "Tactical Grip", id: "tactical_grip", stat: "recoil", value: -6, rarity: "rare", type: "gun" },
+    { name: "Pistol Grip", id: "pistol_grip", stat: "accuracy", value: 4, rarity: "common", type: "gun" },
+    { name: "Bipod", id: "bipod", stat: "stability", value: 20, rarity: "uncommon", type: "gun" },
+    { name: "Assault Bipod", id: "assault_bipod", stat: "stability", value: 25, rarity: "rare", type: "gun" },
+    { name: "Monopod", id: "monopod", stat: "stability", value: 15, rarity: "uncommon", type: "gun" },
+    { name: "Hand Stop", id: "hand_stop", stat: "recoil", value: -2, rarity: "common", type: "gun" },
+    { name: "Magazine Rod", id: "mag_rod", stat: "fireRate", value: 1, rarity: "common", type: "gun" },
+    { name: "Thumb Rest", id: "thumb_rest", stat: "accuracy", value: 6, rarity: "common", type: "gun" },
+    { name: "Pressure Pad", id: "pressure_pad", stat: "fireRate", value: 3, rarity: "uncommon", type: "gun" },
+    { name: "Ergonomic Pad", id: "ergo_pad", stat: "recoil", value: -7, rarity: "rare", type: "gun" },
+    
+    // GUNS - Muzzles & Barrels (20 items)
+    { name: "Suppressor", id: "suppressor", stat: "damage", value: -2, rarity: "rare", type: "gun" },
+    { name: "Muzzle Brake", id: "muzzle_brake", stat: "recoil", value: -8, rarity: "rare", type: "gun" },
+    { name: "Flash Hider", id: "flash_hider", stat: "stealth", value: 15, rarity: "uncommon", type: "gun" },
+    { name: "Compensator", id: "compensator", stat: "spread", value: -5, rarity: "rare", type: "gun" },
+    { name: "Linear Comp", id: "linear_comp", stat: "recoil", value: -10, rarity: "epic", type: "gun" },
+    { name: "Enforcer Muzzle", id: "enforcer_muzzle", stat: "damage", value: 5, rarity: "rare", type: "gun" },
+    { name: "Blast Diverter", id: "blast_diverter", stat: "recoil", value: -9, rarity: "epic", type: "gun" },
+    { name: "Exotic Muzzle", id: "exotic_muzzle", stat: "damage", value: 10, rarity: "epic", type: "gun" },
+    { name: "Quantum Barrel", id: "quantum_barrel", stat: "range", value: 120, rarity: "epic", type: "gun" },
+    { name: "Extended Barrel", id: "extended_barrel", stat: "range", value: 40, rarity: "uncommon", type: "gun" },
+    { name: "Lightweight Barrel", id: "lightweight_barrel", stat: "fireRate", value: 4, rarity: "uncommon", type: "gun" },
+    { name: "Heavy Barrel", id: "heavy_barrel", stat: "stability", value: 18, rarity: "uncommon", type: "gun" },
+    { name: "Precision Barrel", id: "precision_barrel", stat: "accuracy", value: 16, rarity: "rare", type: "gun" },
+    { name: "Archangel Barrel", id: "archangel_barrel", stat: "damage", value: 8, rarity: "rare", type: "gun" },
+    { name: "Inferno Barrel", id: "inferno_barrel", stat: "damage", value: 15, rarity: "epic", type: "gun" },
+    { name: "Frostbite Barrel", id: "frostbite_barrel", stat: "fireRate", value: 6, rarity: "epic", type: "gun" },
+    { name: "Plasma Barrel", id: "plasma_barrel", stat: "range", value: 140, rarity: "epic", type: "gun" },
+    { name: "Titanium Barrel", id: "titanium_barrel", stat: "durability", value: 50, rarity: "rare", type: "gun" },
+    { name: "Carbide Barrel", id: "carbide_barrel", stat: "accuracy", value: 22, rarity: "rare", type: "gun" },
+    { name: "Venom Barrel", id: "venom_barrel", stat: "damage", value: 12, rarity: "rare", type: "gun" },
+    
+    // GUNS - Stocks & Ammo (15 items)
+    { name: "Tactical Stock", id: "stock_tactical", stat: "stability", value: 15, rarity: "common", type: "gun" },
+    { name: "Sniper Stock", id: "stock_sniper", stat: "stability", value: 25, rarity: "rare", type: "gun" },
+    { name: "Collapsible Stock", id: "stock_collapsible", stat: "weight", value: -3, rarity: "common", type: "gun" },
+    { name: "SAS Stock", id: "stock_sas", stat: "recoil", value: -4, rarity: "uncommon", type: "gun" },
+    { name: "Extended Mag", id: "mag_extended", stat: "ammo", value: 15, rarity: "uncommon", type: "gun" },
+    { name: "Drum Mag", id: "mag_drum", stat: "ammo", value: 30, rarity: "rare", type: "gun" },
+    { name: "Fast Mag", id: "mag_fast_reload", stat: "reloadTime", value: -0.5, rarity: "uncommon", type: "gun" },
+    { name: "Quad Mag", id: "mag_quad", stat: "ammo", value: 50, rarity: "epic", type: "gun" },
+    { name: "STANAG Mag", id: "stanag_mag", stat: "ammo", value: 12, rarity: "common", type: "gun" },
+    { name: "Hollow Point Mag", id: "hollow_point", stat: "damage", value: 6, rarity: "uncommon", type: "gun" },
+    { name: "Armor Piercing", id: "armor_piercing", stat: "pierceChance", value: 30, rarity: "rare", type: "gun" },
+    { name: "Incendiary Round", id: "incendiary", stat: "burnEffect", value: 20, rarity: "rare", type: "gun" },
+    { name: "Explosive Round", id: "explosive_round", stat: "explosionRadius", value: 60, rarity: "epic", type: "gun" },
+    { name: "Tracer Round", id: "tracer_round", stat: "visibility", value: 40, rarity: "uncommon", type: "gun" },
+    { name: "Cryo Round", id: "cryo_round", stat: "freezeEffect", value: 25, rarity: "rare", type: "gun" },
+    
+    // SWORDS - Blades & Edges (15 items)
+    { name: "Monomolecular Edge", id: "mono_edge", stat: "bladeSharp", value: 30, rarity: "epic", type: "sword" },
+    { name: "Serrated Edge", id: "serrated_edge", stat: "bleedsEffect", value: 20, rarity: "uncommon", type: "sword" },
+    { name: "Curved Blade", id: "curved_blade", stat: "swingSpeed", value: 5, rarity: "uncommon", type: "sword" },
+    { name: "Straight Blade", id: "straight_blade", stat: "damage", value: 8, rarity: "common", type: "sword" },
+    { name: "Plasma Edge", id: "plasma_edge", stat: "damage", value: 20, rarity: "epic", type: "sword" },
+    { name: "Frost Blade", id: "frost_blade", stat: "freezeChance", value: 35, rarity: "rare", type: "sword" },
+    { name: "Inferno Blade", id: "inferno_blade", stat: "burnChance", value: 35, rarity: "rare", type: "sword" },
+    { name: "Venom Blade", id: "venom_blade", stat: "poisonDps", value: 15, rarity: "rare", type: "sword" },
+    { name: "Thunder Blade", id: "thunder_blade", stat: "shockChance", value: 40, rarity: "epic", type: "sword" },
+    { name: "Shadow Blade", id: "shadow_blade", stat: "critChance", value: 25, rarity: "rare", type: "sword" },
+    { name: "Diamond Edge", id: "diamond_edge", stat: "hardness", value: 50, rarity: "epic", type: "sword" },
+    { name: "Obsidian Edge", id: "obsidian_edge", stat: "bladeSharp", value: 25, rarity: "rare", type: "sword" },
+    { name: "Silk Blade", id: "silk_blade", stat: "swingSpeed", value: 8, rarity: "rare", type: "sword" },
+    { name: "Titanium Reinforcement", id: "titanium_reinforce", stat: "durability", value: 60, rarity: "rare", type: "sword" },
+    { name: "Chaotic Blade", id: "chaotic_blade", stat: "unpredictability", value: 45, rarity: "epic", type: "sword" },
+    
+    // SWORDS - Hilts & Handles (12 items)
+    { name: "Leather Grip", id: "leather_grip", stat: "control", value: 10, rarity: "common", type: "sword" },
+    { name: "Runed Hilt", id: "runed_hilt", stat: "enchantment", value: 20, rarity: "rare", type: "sword" },
+    { name: "Blessed Grip", id: "blessed_grip", stat: "holiness", value: 15, rarity: "uncommon", type: "sword" },
+    { name: "Soul Hilt", id: "soul_hilt", stat: "drain", value: 30, rarity: "epic", type: "sword" },
+    { name: "Adaptive Grip", id: "adaptive_grip", stat: "control", value: 18, rarity: "rare", type: "sword" },
+    { name: "Guardian Hilt", id: "guardian_hilt", stat: "blockPower", value: 40, rarity: "rare", type: "sword" },
+    { name: "Void Grip", id: "void_grip", stat: "emptiness", value: 25, rarity: "rare", type: "sword" },
+    { name: "Diamond Grip", id: "diamond_grip", stat: "luxury", value: 50, rarity: "epic", type: "sword" },
+    { name: "Comfortable Grip", id: "comfortable_grip", stat: "control", value: 12, rarity: "uncommon", type: "sword" },
+    { name: "Wraith Grip", id: "wraith_grip", stat: "ghostliness", value: 35, rarity: "epic", type: "sword" },
+    { name: "Mystic Grip", id: "mystic_grip", stat: "magicPower", value: 28, rarity: "rare", type: "sword" },
+    { name: "Iron Grip", id: "iron_grip", stat: "strength", value: 20, rarity: "uncommon", type: "sword" },
+    
+    // ABILITIES - Mods & Enhancers (18 items)
+    { name: "Amplifier Core", id: "amplifier_core", stat: "damage", value: 25, rarity: "rare", type: "ability" },
+    { name: "Haste Rune", id: "haste_rune", stat: "castTime", value: -0.3, rarity: "uncommon", type: "ability" },
+    { name: "Extended Range Module", id: "extended_range", stat: "radius", value: 80, rarity: "rare", type: "ability" },
+    { name: "Duration Matrix", id: "duration_matrix", stat: "duration", value: 5, rarity: "uncommon", type: "ability" },
+    { name: "Crit Modifier", id: "crit_modifier", stat: "critChance", value: 35, rarity: "rare", type: "ability" },
+    { name: "Chain Accelerator", id: "chain_accelerator", stat: "chainTargets", value: 5, rarity: "rare", type: "ability" },
+    { name: "Cooldown Reducer", id: "cooldown_reducer", stat: "cooldown", value: -2, rarity: "uncommon", type: "ability" },
+    { name: "Mana Conduit", id: "mana_conduit", stat: "efficiency", value: 30, rarity: "uncommon", type: "ability" },
+    { name: "Overcharge Device", id: "overcharge", stat: "power", value: 50, rarity: "epic", type: "ability" },
+    { name: "Resonance Crystal", id: "resonance_crystal", stat: "area", value: 120, rarity: "epic", type: "ability" },
+    { name: "Entropy Surge", id: "entropy_surge", stat: "chaos", value: 40, rarity: "rare", type: "ability" },
+    { name: "Void Tuner", id: "void_tuner", stat: "power", value: 35, rarity: "rare", type: "ability" },
+    { name: "Ascension Gem", id: "ascension_gem", stat: "transcendence", value: 60, rarity: "epic", type: "ability" },
+    { name: "Stellar Nexus", id: "stellar_nexus", stat: "cosmicPower", value: 70, rarity: "epic", type: "ability" },
+    { name: "Quantum Fluctuator", id: "quantum_flux", stat: "unpredictability", value: 50, rarity: "epic", type: "ability" },
+    { name: "Prism Splitter", id: "prism_splitter", stat: "splitDamage", value: 45, rarity: "rare", type: "ability" },
+    { name: "Temporal Accelerant", id: "temporal_accel", stat: "speed", value: 55, rarity: "epic", type: "ability" },
+    { name: "Cascade Module", id: "cascade_module", stat: "chainReaction", value: 65, rarity: "epic", type: "ability" },
+    
+    // THROWABLES - Enhancements (15 items)
+    { name: "Fuse Reducer", id: "fuse_reducer", stat: "fuseTime", value: -0.5, rarity: "uncommon", type: "throwable" },
+    { name: "Shrapnel Pack", id: "shrapnel_pack", stat: "explosionRadius", value: 100, rarity: "rare", type: "throwable" },
+    { name: "Impact Detonator", id: "impact_detonator", stat: "triggerSpeed", value: -0.1, rarity: "uncommon", type: "throwable" },
+    { name: "Sticky Adhesive", id: "sticky_adhesive", stat: "stickiness", value: 90, rarity: "uncommon", type: "throwable" },
+    { name: "Bounce Enhancer", id: "bounce_enhancer", stat: "bounceCount", value: 8, rarity: "uncommon", type: "throwable" },
+    { name: "Reinforced Casing", id: "reinforced_casing", stat: "durability", value: 50, rarity: "uncommon", type: "throwable" },
+    { name: "Plasma Charge", id: "plasma_charge", stat: "damage", value: 30, rarity: "rare", type: "throwable" },
+    { name: "Cryo Detonator", id: "cryo_detonator", stat: "freezeRadius", value: 80, rarity: "rare", type: "throwable" },
+    { name: "Incendiary Charge", id: "incendiary_charge", stat: "burnRadius", value: 90, rarity: "rare", type: "throwable" },
+    { name: "Toxin Disperser", id: "toxin_disperser", stat: "poisonCloud", value: 100, rarity: "rare", type: "throwable" },
+    { name: "Volt Inducer", id: "volt_inducer", stat: "shockRadius", value: 70, rarity: "rare", type: "throwable" },
+    { name: "Sonic Emitter", id: "sonic_emitter", stat: "sound", value: 150, rarity: "epic", type: "throwable" },
+    { name: "Void Fragment", id: "void_fragment", stat: "annihilation", value: 200, rarity: "epic", type: "throwable" },
+    { name: "Stellar Burst", id: "stellar_burst", stat: "brilliance", value: 180, rarity: "epic", type: "throwable" },
+    { name: "Chaos Catalyst", id: "chaos_catalyst", stat: "chaos", value: 160, rarity: "epic", type: "throwable" }
+  ];
+
+  const getRandomAddon = () => {
+    const rarityRoll = Math.random();
+    let rarity = "common";
+    if (rarityRoll > 0.8) rarity = "epic";
+    else if (rarityRoll > 0.6) rarity = "rare";
+    else if (rarityRoll > 0.4) rarity = "uncommon";
+    
+    const filtered = ADDON_TYPES.filter(a => a.rarity === rarity);
+    return filtered[Math.floor(Math.random() * filtered.length)];
+  };
+
   function fresh() {
     return {
       version: 2, createdAt: Date.now(), updatedAt: Date.now(),
@@ -61,6 +221,7 @@
       },
       permanent: { speed: 255, jump: 540, gravity: 1300, doubleJump: false, crateLuck: 0, dropPower: 0 },
       inventory: {}, achievements: {}, unlockedSkins: ["rookie"], currentSkin: "rookie",
+      lootboxes: [], addons: [], weapons: [],
       visitedOrigins: [], panelTab: "inventory"
     };
   }
@@ -72,6 +233,9 @@
       permanent: { ...base.permanent, ...(incoming.permanent || {}) },
       inventory: { ...base.inventory, ...(incoming.inventory || {}) },
       achievements: { ...base.achievements, ...(incoming.achievements || {}) },
+      lootboxes: [...(base.lootboxes || []), ...(incoming.lootboxes || [])],
+      addons: [...(base.addons || []), ...(incoming.addons || [])],
+      weapons: [...(base.weapons || []), ...(incoming.weapons || [])],
       unlockedSkins: [...new Set([...(base.unlockedSkins || []), ...(incoming.unlockedSkins || [])])],
       visitedOrigins: [...new Set([...(base.visitedOrigins || []), ...(incoming.visitedOrigins || [])])]
     };
@@ -112,7 +276,7 @@
 
   const game = {
     running: true, keys: new Set(), platforms: [], crates: [], customLevel: null,
-    multiplayer: { socket: null, room: null, playerId: null, peers: {}, lastSentAt: 0, isHost: false, pvpEnabled: false },
+    multiplayer: { socket: null, room: null, playerId: null, peers: {}, lastSentAt: 0, isHost: false, pvpEnabled: false, isPersistent: false },
     linkHits: new WeakMap(), lastFrame: performance.now(), lastScan: 0, coyote: 0,
     dropTimer: 0, currentPlatform: null, currentHighlight: null, lastLandingSource: null,
     finished: false, startedAt: Date.now(),
@@ -184,6 +348,7 @@
     #${ROOT}-health-text{font:10px/1 ui-monospace,monospace;color:#94a3b8}
     #${ROOT}-weapon-hud{position:fixed;bottom:20px;right:20px;z-index:2147483646;display:none;background:rgba(15,23,42,.88);border:1px solid rgba(148,163,184,.35);border-radius:10px;padding:8px 12px;font:11px/1.4 ui-monospace,monospace;color:#f8fafc;pointer-events:none}
     #${ROOT}-weapon-hud.visible{display:block}
+    #${ROOT}-weapon-canvas{position:absolute;left:0;top:0;z-index:2147483645;pointer-events:none;width:100%;height:100%}
     #${ROOT}-killfeed{position:fixed;top:70px;right:16px;z-index:2147483646;display:flex;flex-direction:column;gap:4px;pointer-events:none;max-width:280px}
     .${ROOT}-killfeed-entry{background:rgba(15,23,42,.85);border:1px solid rgba(148,163,184,.2);border-radius:6px;padding:4px 10px;font:10px/1.4 ui-monospace,monospace;color:#f8fafc;animation:${ROOT}-fade 4s ease forwards}
     .${ROOT}-projectile{position:absolute;border-radius:50%;z-index:2147483645;pointer-events:none}
@@ -226,7 +391,12 @@
   const respawnOverlay = document.createElement("div"); respawnOverlay.id = `${ROOT}-respawn-overlay`;
   respawnOverlay.innerHTML = `<div id="${ROOT}-respawn-text">YOU DIED</div><div id="${ROOT}-respawn-sub">Respawning in 3...</div>`;
 
-  document.body.append(hud, panel, toast, levelBg, levelGeo, remoteLayer, playerEl, finish, highlight, healthbarWrap, weaponHud, killfeed, respawnOverlay);
+  // Weapon canvas for rendering weapons
+  const weaponCanvas = document.createElement("canvas");
+  weaponCanvas.id = `${ROOT}-weapon-canvas`;
+  const weaponCtx = weaponCanvas.getContext("2d");
+
+  document.body.append(hud, panel, toast, levelBg, levelGeo, remoteLayer, playerEl, finish, highlight, healthbarWrap, weaponHud, killfeed, respawnOverlay, weaponCanvas);
 
   const say = (text) => {
     const card = document.createElement("div");
@@ -415,9 +585,21 @@
         const spread = ((w.stats.spread || 0) * Math.PI / 180) * (Math.random() - 0.5) * 2;
         const angle = game.player.facing > 0 ? spread : Math.PI + spread;
         const spd = w.stats.speed || 400;
+        
+        // Calculate barrel position based on weapon appearance
+        let barrelOffsetX = 0;
+        let barrelOffsetY = 8; // Account for gun being at hip level now
+        if (w.type === 'gun' && w.appearance) {
+          // For guns, fire from barrel tip
+          const barrelLength = (w.appearance.barrelLength || 40);
+          const bodyWidth = (w.appearance.bodyWidth || 20);
+          barrelOffsetX = (bodyWidth / 2 + barrelLength) * game.player.facing;
+          barrelOffsetY = 8;
+        }
+        
         const proj = {
-          x: game.player.x + game.player.width / 2,
-          y: game.player.y + game.player.height / 2,
+          x: game.player.x + game.player.width / 2 + barrelOffsetX,
+          y: game.player.y + game.player.height / 2 + barrelOffsetY,
           vx: Math.cos(angle) * spd,
           vy: Math.sin(angle) * spd,
           damage: w.stats.damage || 25,
@@ -550,6 +732,202 @@
     }
   };
 
+  // ── Weapon Drawing Functions ───────────────────────────────────
+  const drawGun = (ctx, a) => {
+    const a_safe = a || {};
+    const pc = a_safe.primaryColor || "#60a5fa";
+    const sc = a_safe.secondaryColor || "#3b82f6";
+    const ac = a_safe.accentColor || "#f59e0b";
+    const bL = a_safe.barrelLength || 60;     // Increased from 40
+    const bW = a_safe.barrelWidth || 10;      // Increased from 6
+    const bdW = a_safe.bodyWidth || 30;       // Increased from 20
+    const bdH = a_safe.bodyHeight || 18;      // Increased from 12
+    const stL = a_safe.stockLength || 40;     // Increased from 30
+    const stH = a_safe.stockHeight || 14;     // Increased from 10
+    const grH = a_safe.gripHeight || 20;      // Increased from 15
+    const grW = a_safe.gripWidth || 8;        // Increased from 6
+    const magSz = a_safe.magazineSize || 16;  // Increased from 12
+    const magA = a_safe.magazineAngle || 0;
+    
+    // Stock
+    ctx.fillStyle = sc;
+    ctx.fillRect(-stL - bdW / 2, -stH / 2 + 2, stL, stH);
+    // Body
+    ctx.fillStyle = pc;
+    ctx.fillRect(-bdW / 2, -bdH / 2, bdW, bdH);
+    // Grip
+    ctx.fillStyle = sc;
+    ctx.fillRect(-grW / 2 + 4, bdH / 2, grW, grH);
+    // Magazine
+    if (magSz > 4) {
+      ctx.save();
+      ctx.translate(4, bdH / 2);
+      ctx.rotate((magA * Math.PI) / 180);
+      ctx.fillStyle = ac;
+      ctx.fillRect(-4, 0, 8, magSz * 1.2);
+      ctx.restore();
+    }
+    // Barrel
+    ctx.fillStyle = pc;
+    ctx.fillRect(bdW / 2, -bW / 2, bL, bW);
+    ctx.fillStyle = sc;
+    ctx.fillRect(bdW / 2 + bL - 8, -bW / 2, 8, bW / 2);
+    
+    // Add outline for visibility
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-stL - bdW / 2, -stH / 2 + 2, stL + bdW + bL, stH + bdH + grH);
+  };
+
+  const drawSword = (ctx, a) => {
+    const a_safe = a || {};
+    const pc = a_safe.primaryColor || "#cbd5e1";
+    const sc = a_safe.secondaryColor || "#94a3b8";
+    const ac = a_safe.accentColor || "#fbbf24";
+    const bW = a_safe.bladeWidth || 8;       // Increased from 4
+    const bC = a_safe.bladeCurve || 0;
+    const gW = a_safe.guardWidth || 32;      // Increased from 20
+    const gH = a_safe.guardHeight || 14;     // Increased from 10
+    const hL = a_safe.handleLength || 45;    // Increased from 30
+    const hW = a_safe.handleWidth || 6;      // Increased from 4
+    const pSz = a_safe.pommelSize || 10;     // Increased from 6
+    const bLen = (pvp.weapon?.stats?.bladeLength || 100); // Increased from 80
+    
+    ctx.save();
+    ctx.rotate(-Math.PI / 4);
+    // Pommel
+    ctx.fillStyle = ac;
+    ctx.beginPath();
+    ctx.arc(0, hL / 2 + pSz / 2, pSz / 2, 0, Math.PI * 2);
+    ctx.fill();
+    // Handle
+    for (let i = 0; i < hL; i += 6) {
+      ctx.fillStyle = i % 12 === 0 ? sc : pc;
+      ctx.fillRect(-hW / 2, i - hL / 2, hW, 6);
+    }
+    // Guard
+    ctx.fillStyle = ac;
+    ctx.fillRect(-gW / 2, -gH / 2, gW, gH);
+    // Blade
+    ctx.fillStyle = pc;
+    ctx.beginPath();
+    ctx.moveTo(-bW / 2, 0);
+    ctx.quadraticCurveTo(-bW / 4 + bC, -bLen / 2, 0, -bLen);
+    ctx.quadraticCurveTo(bW / 4 + bC, -bLen / 2, bW / 2, 0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  };
+
+  const drawAbility = (ctx, a) => {
+    const a_safe = a || {};
+    const pc = a_safe.primaryColor || "#8b5cf6";
+    const sc = a_safe.secondaryColor || "#7c3aed";
+    const ac = a_safe.accentColor || "#60a5fa";
+    const shape = a_safe.abilityShape || "circle";
+    const sz = (a_safe.abilitySize || 64) / 2;  // Doubled from 32
+    
+    ctx.strokeStyle = pc;
+    ctx.lineWidth = 4;
+    ctx.fillStyle = sc + '44';
+    if (shape === 'circle') {
+      ctx.beginPath();
+      ctx.arc(0, 0, sz, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    } else if (shape === 'ring') {
+      ctx.beginPath();
+      ctx.arc(0, 0, sz, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(0, 0, sz * 0.6, 0, Math.PI * 2);
+      ctx.stroke();
+    } else if (shape === 'star') {
+      ctx.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const r = i % 2 === 0 ? sz : sz * 0.4;
+        const ang = (i * Math.PI) / 5 - Math.PI / 2;
+        i === 0 ? ctx.moveTo(Math.cos(ang) * r, Math.sin(ang) * r) : ctx.lineTo(Math.cos(ang) * r, Math.sin(ang) * r);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    } else {
+      ctx.beginPath();
+      ctx.arc(0, 0, sz, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+    ctx.fillStyle = ac;
+    ctx.beginPath();
+    ctx.arc(0, 0, sz * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+  };
+
+  const drawThrowable = (ctx, a) => {
+    const a_safe = a || {};
+    const pc = a_safe.primaryColor || "#ef4444";
+    const sc = a_safe.secondaryColor || "#dc2626";
+    const ac = a_safe.accentColor || "#fca5a5";
+    const shape = a_safe.throwableShape || "sphere";
+    const sz = a_safe.throwableSize || 28;  // Doubled from 14
+    const s = sz / 2;
+    
+    if (shape === 'sphere' || !shape) {
+      ctx.fillStyle = pc;
+      ctx.beginPath();
+      ctx.arc(0, 0, s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = sc;
+      ctx.beginPath();
+      ctx.arc(-s * 0.25, -s * 0.25, s * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (shape === 'cube') {
+      ctx.fillStyle = pc;
+      ctx.fillRect(-s, -s, s * 2, s * 2);
+      ctx.fillStyle = sc;
+      ctx.fillRect(-s, -s, s, s);
+    }
+  };
+
+  const drawWeapon = (ctx, wx, wy, facing) => {
+    if (!pvp.weapon) return;
+    const w = pvp.weapon;
+    ctx.save();
+    ctx.translate(wx, wy);
+    // Don't scale by facing here since renderWeapon already handles it
+    if (w.type === 'gun') drawGun(ctx, w.appearance);
+    else if (w.type === 'sword') drawSword(ctx, w.appearance);
+    else if (w.type === 'ability') drawAbility(ctx, w.appearance);
+    else drawThrowable(ctx, w.appearance);
+    ctx.restore();
+  };
+
+  const renderWeapon = () => {
+    const docWidth = Math.max(window.innerWidth, document.documentElement.scrollWidth, document.body.scrollWidth);
+    const docHeight = Math.max(window.innerHeight, document.documentElement.scrollHeight, document.body.scrollHeight);
+    
+    weaponCanvas.width = docWidth;
+    weaponCanvas.height = docHeight;
+    weaponCtx.clearRect(0, 0, docWidth, docHeight);
+    
+    if (!pvp.weapon) return;
+    
+    const px = game.player.x + game.player.width / 2;
+    const py = game.player.y + game.player.height / 2;
+    const facing = game.player.facing > 0 ? 1 : -1;
+    
+    // Draw weapon at a larger, more visible scale
+    weaponCtx.globalAlpha = 0.95;
+    weaponCtx.save();
+    weaponCtx.translate(px + (facing * 45), py + 8);
+    weaponCtx.scale(facing, 1);  // flip if needed
+    weaponCtx.scale(1, 1);   // enlarge weapon 2.5x
+    drawWeapon(weaponCtx, 0, 0, 1);
+    
+    weaponCtx.restore();
+  };
+
   const updateProjectiles = (dt) => {
     pvp.projectiles = pvp.projectiles.filter(proj => {
       proj.vy += 400 * dt * (proj.isThrowable ? 1 : (pvp.weapon?.stats?.projectileGravity || 0) / 100);
@@ -622,10 +1000,53 @@
   const panelHtml = {
     inventory() {
       const items = Object.entries(state.inventory).sort((a, b) => b[1] - a[1]);
-      return `<h2>Inventory</h2><div class="${ROOT}-entry">Unique items: ${items.length}</div>${items.length ? items.map(([id, count]) => {
-        const item = ITEMS.find((e) => id.startsWith(e.id.split("-").slice(0, -1).join("-"))) || { name: id, rarity: "unknown" };
-        return `<div class="${ROOT}-entry"><strong>${item.name}</strong><span class="${ROOT}-muted">Count ${count} | ${item.rarity}</span></div>`;
-      }).join("") : `<div class="${ROOT}-entry">No items yet. Open crates.</div>`}<button class="${ROOT}-button" data-close="1">Close</button>`;
+      const lootboxes = state.lootboxes || [];
+      const addons = state.addons || [];
+      const weapons = state.weapons || [];
+      
+      let html = `<h2>Inventory</h2>`;
+      
+      // Weapons section
+      html += `<div class="${ROOT}-entry"><strong>⚔ Weapons (${weapons.length})</strong>`;
+      if (weapons.length) {
+        html += weapons.map((wpn, i) => `<div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center"><span class="${ROOT}-muted"><strong>${wpn.name}</strong><br><span style="font-size:10px">${wpn.type}</span></span><div style="display:flex;gap:4px"><button class="${ROOT}-button" data-load-weapon="${i}" style="padding:4px 8px;font-size:9px">LOAD</button><button class="${ROOT}-button" data-delete-weapon="${i}" style="padding:4px 8px;font-size:9px">DELETE</button></div></div>`).join("");
+      } else {
+        html += `<span class="${ROOT}-muted">No weapons. Build them in the weapon builder!</span>`;
+      }
+      html += `</div>`;
+      
+      // Lootboxes section
+      html += `<div class="${ROOT}-entry"><strong>🎁 Lootboxes (${lootboxes.length})</strong>`;
+      if (lootboxes.length) {
+        html += lootboxes.map((lb, i) => `<div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center"><span class="${ROOT}-muted">${lb.type.toUpperCase()}</span><button class="${ROOT}-button" data-open-lootbox="${lb.id}" style="padding:4px 8px;font-size:9px">OPEN</button></div>`).join("");
+      } else {
+        html += `<span class="${ROOT}-muted">No lootboxes. Collect crates!</span>`;
+      }
+      html += `</div>`;
+      
+      // Addons section
+      html += `<div class="${ROOT}-entry"><strong>🔧 Weapon Addons (${addons.length})</strong>`;
+      if (addons.length) {
+        html += addons.map((addon, i) => `<div style="margin-top:6px;display:flex;justify-content:space-between;align-items:center;padding:6px;background:rgba(96,165,250,0.1);border-radius:6px"><span class="${ROOT}-muted"><strong>${addon.name}</strong><br><span style="font-size:10px">${addon.stat} +${addon.value}</span></span><button class="${ROOT}-button" data-delete-addon="${addon.id}" style="padding:4px 8px;font-size:9px">DELETE</button></div>`).join("");
+      } else {
+        html += `<span class="${ROOT}-muted">No addons yet. Open lootboxes!</span>`;
+      }
+      html += `</div>`;
+      
+      // Regular items section
+      html += `<div class="${ROOT}-entry"><strong>Items (${items.length})</strong>`;
+      if (items.length) {
+        html += items.map(([id, count]) => {
+          const item = ITEMS.find((e) => id.startsWith(e.id.split("-").slice(0, -1).join("-"))) || { name: id, rarity: "unknown" };
+          return `<div class="${ROOT}-entry"><strong>${item.name}</strong><span class="${ROOT}-muted">Count ${count} | ${item.rarity}</span></div>`;
+        }).join("");
+      } else {
+        html += `<span class="${ROOT}-muted">No items yet.</span>`;
+      }
+      html += `</div>`;
+      
+      html += `<button class="${ROOT}-button" data-close="1">Close</button>`;
+      return html;
     },
     achievements() {
       return `<h2>Achievements</h2><div class="${ROOT}-entry">Unlocked: ${Object.keys(state.achievements).length}</div>${Object.entries(ACH).map(([id, label]) => `<div class="${ROOT}-entry"><strong>${label}</strong><span class="${ROOT}-muted">${state.achievements[id] ? "Unlocked" : "Locked"}</span></div>`).join("")}<button class="${ROOT}-button" data-close="1">Close</button>`;
@@ -684,15 +1105,16 @@
       const connected = !!game.multiplayer.socket;
       const code = game.multiplayer.room || "";
       const isHost = game.multiplayer.isHost;
+      const isPersistent = game.multiplayer.isPersistent;
       const pvpOn = game.multiplayer.pvpEnabled;
       const weaponName = pvp.weapon ? pvp.weapon.name : "None loaded";
       return (
         '<h2>Multiplayer</h2>' +
         (connected ?
-          '<div class="' + ROOT + '-entry"><strong>Connected' + (pvpOn ? '<span class="' + ROOT + '-pvp-badge">PvP ON</span>' : '') + '</strong>' +
+          '<div class="' + ROOT + '-entry"><strong>Connected' + (pvpOn ? '<span class="' + ROOT + '-pvp-badge">PvP ON</span>' : '') + (isPersistent ? '<span class="' + ROOT + '-pvp-badge" style="background:#8b5cf6">PERSISTENT</span>' : '') + '</strong>' +
           '<span class="' + ROOT + '-muted">Room code: <strong style="color:#fff;font-size:18px;letter-spacing:4px">' + code + '</strong></span>' +
           '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">' +
-          (isHost ? '<button class="' + ROOT + '-button" data-action="' + (pvpOn ? 'pvp-off' : 'pvp-on') + '">' + (pvpOn ? '⚔ Disable PvP' : '⚔ Enable PvP') + '</button>' : '<span class="' + ROOT + '-muted" style="margin-top:4px">Only host can toggle PvP</span>') +
+          (!isPersistent && isHost ? '<button class="' + ROOT + '-button" data-action="' + (pvpOn ? 'pvp-off' : 'pvp-on') + '">' + (pvpOn ? '⚔ Disable PvP' : '⚔ Enable PvP') + '</button>' : '') +
           '<button class="' + ROOT + '-button" data-action="mp-leave">Leave room</button>' +
           '</div></div>' +
           '<div class="' + ROOT + '-entry"><strong>Weapon</strong>' +
@@ -700,13 +1122,15 @@
           '<div style="margin-top:8px"><button class="' + ROOT + '-button" data-action="load-weapon">Load .wpn File</button></div></div>' +
           '<div class="' + ROOT + '-entry"><strong>PvP Stats</strong>' +
           '<span class="' + ROOT + '-muted">Kills: ' + pvp.kills + ' | Deaths: ' + pvp.deaths + '</span></div>' :
-          '<div class="' + ROOT + '-entry"><strong>Create room</strong>' +
-          '<div style="margin-top:8px"><button class="' + ROOT + '-button" data-action="mp-create">Create room</button></div></div>' +
-          '<div class="' + ROOT + '-entry"><strong>Join room</strong>' +
+          '<div class="' + ROOT + '-entry"><strong>Multiplayer Rooms</strong>' +
           '<div style="margin-top:8px;display:flex;gap:8px">' +
+          '<button class="' + ROOT + '-button" data-action="mp-create">Create Room</button>' +
           '<input id="' + ROOT + '-room-input" placeholder="XKQZ" maxlength="4" style="width:80px;padding:6px 10px;border-radius:999px;border:1px solid rgba(96,165,250,.5);background:rgba(30,41,59,.9);color:#fff;font:inherit;outline:none;text-transform:uppercase">' +
           '<button class="' + ROOT + '-button" data-action="mp-join">Join</button></div>' +
-          '<span id="' + ROOT + '-mp-status" class="' + ROOT + '-muted" style="display:block;margin-top:6px"></span></div>'
+          '<span id="' + ROOT + '-mp-status" class="' + ROOT + '-muted" style="display:block;margin-top:6px"></span></div>' +
+          '<div class="' + ROOT + '-entry"><strong>Persistent Servers</strong>' +
+          '<div style="margin-top:8px"><button class="' + ROOT + '-button" data-action="create-server">Create Server</button> <button class="' + ROOT + '-button" data-action="list-servers">Browse Servers</button></div></div>' +
+          '<div id="' + ROOT + '-server-list" style="margin-top:10px"></div>'
         ) +
         '<button class="' + ROOT + '-button" data-close="1">Close</button>'
       );
@@ -724,6 +1148,56 @@
     content.querySelectorAll("[data-action='pick-level']").forEach(function(btn) { btn.addEventListener("click", function() { pickLevelFile(); }); });
     content.querySelectorAll("[data-action='clear-level']").forEach(function(btn) { btn.addEventListener("click", function() { clearLevel(); }); });
     content.querySelectorAll("[data-close]").forEach(function(btn) { btn.addEventListener("click", function() { panel.classList.remove(ROOT + "-open"); }); });
+
+    // Lootbox opening
+    content.querySelectorAll("[data-open-lootbox]").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        openLootbox(btn.dataset.openLootbox);
+      });
+    });
+
+    // Addon deletion
+    content.querySelectorAll("[data-delete-addon]").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        const addonId = btn.dataset.deleteAddon;
+        const idx = state.addons.findIndex(a => a.id === addonId);
+        if (idx !== -1) {
+          state.addons.splice(idx, 1);
+          save();
+          openPanel("inventory");
+          say("Addon deleted");
+        }
+      });
+    });
+
+    // Weapon loading
+    content.querySelectorAll("[data-load-weapon]").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        const idx = parseInt(btn.dataset.loadWeapon);
+        const wpn = state.weapons?.[idx];
+        if (wpn) {
+          pvp.weapon = wpn;
+          updateWeaponUI();
+          say("Weapon loaded: " + wpn.name);
+          panel.classList.remove(ROOT + "-open");
+        }
+      });
+    });
+
+    // Weapon deletion
+    content.querySelectorAll("[data-delete-weapon]").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        const idx = parseInt(btn.dataset.deleteWeapon);
+        if (state.weapons && idx >= 0 && idx < state.weapons.length) {
+          const wpn = state.weapons[idx];
+          state.weapons.splice(idx, 1);
+          if (pvp.weapon === wpn) pvp.weapon = null;
+          save();
+          openPanel("inventory");
+          say("Weapon deleted: " + wpn.name);
+        }
+      });
+    });
 
     content.querySelectorAll("[data-action='save-username']").forEach(function(btn) {
       btn.addEventListener("click", function() {
@@ -854,6 +1328,74 @@
         connectMultiplayer("join", code);
       });
     });
+
+    // Persistent servers
+    content.querySelectorAll("[data-action='create-server']").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        if (!game.customLevel) {
+          say("Load a level first to create a persistent server!");
+          return;
+        }
+        var serverName = prompt("Enter server name:", "My Server");
+        if (!serverName) return;
+        var maxPlayers = prompt("Max players (1-32):", "10");
+        maxPlayers = Math.min(32, Math.max(1, parseInt(maxPlayers) || 10));
+        
+        btn.textContent = "Creating..."; btn.disabled = true;
+        fetch(API_URL + "/persistent-servers", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: serverName,
+            creatorName: getUsername(),
+            levelData: game.customLevel,
+            maxPlayers: maxPlayers
+          })
+        }).then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (data.ok) {
+              say("Server created! Code: " + data.roomCode);
+              connectMultiplayer("join", data.roomCode);
+            } else {
+              say("Failed to create server: " + (data.error || "Unknown error"));
+              btn.textContent = "Create Server"; btn.disabled = false;
+            }
+          })
+          .catch(function(e) { say("Could not reach server."); btn.textContent = "Create Server"; btn.disabled = false; });
+      });
+    });
+
+    content.querySelectorAll("[data-action='list-servers']").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var listEl = content.querySelector("#" + ROOT + "-server-list");
+        if (!listEl) return;
+        listEl.textContent = "Loading servers...";
+        fetch(API_URL + "/persistent-servers?limit=15")
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (!data.servers || !data.servers.length) { listEl.textContent = "No servers available."; return; }
+            listEl.innerHTML = data.servers.map(function(s) {
+              return '<div class="' + ROOT + '-entry" style="margin-bottom:6px"><strong>' + s.name + '</strong>' +
+                '<span class="' + ROOT + '-muted">by ' + s.creatorName + ' \u00b7 Players: ' + s.playerCount + '/' + s.maxPlayers + '</span>' +
+                '<div style="margin-top:6px"><button class="' + ROOT + '-button" data-join-server="' + s.id + '">Join Server</button></div></div>';
+            }).join("");
+            listEl.querySelectorAll("[data-join-server]").forEach(function(jbtn) {
+              jbtn.addEventListener("click", function() {
+                jbtn.textContent = "Connecting..."; jbtn.disabled = true;
+                fetch(API_URL + "/persistent-servers/" + jbtn.dataset.joinServer)
+                  .then(function(r) { return r.json(); })
+                  .then(function(server) {
+                    if (!server.roomCode) { say("Server info incomplete."); jbtn.disabled = false; jbtn.textContent = "Join"; return; }
+                    say("Joining server: " + server.name);
+                    connectMultiplayer("join", server.roomCode);
+                  })
+                  .catch(function() { say("Failed to join server."); jbtn.disabled = false; jbtn.textContent = "Join"; });
+              });
+            });
+          })
+          .catch(function() { listEl.textContent = "Server unreachable."; });
+      });
+    });
     content.querySelectorAll("[data-action='mp-leave']").forEach(function(btn) { btn.addEventListener("click", function() { disconnectMultiplayer(); openPanel("multi"); }); });
 
     if (tab === "levels") fetchAndRenderLevels();
@@ -938,7 +1480,7 @@
       return;
     }
     const candidates = game.platforms.filter((p, i) => i > 1 && p.width > 50);
-    const count = Math.min(18, Math.max(8, Math.floor(candidates.length / 7)));
+    const count = Math.min(12, Math.max(4, Math.floor(candidates.length / 15)));
     const used = new Set();
     for (let i = 0; i < count && candidates.length; i++) {
       const p = candidates[Math.floor(Math.random() * candidates.length)];
@@ -1012,7 +1554,8 @@
       game.multiplayer.playerId = message.id;
       game.multiplayer.room = message.room;
       game.multiplayer.isHost = message.isHost || false;
-      say("Connected! Room code: " + message.room);
+      game.multiplayer.isPersistent = message.isPersistent || false;
+      say("Connected! Room code: " + message.room + (message.isPersistent ? " [PERSISTENT SERVER]" : ""));
       if (panel.classList.contains(ROOT + "-open")) openPanel("multi");
       return;
     }
@@ -1111,10 +1654,252 @@
   const openCrate = (crate) => {
     if (crate.opened) return;
     crate.opened = true; crate.el.remove(); state.stats.cratesOpened += 1;
-    const item = ITEMS[(Math.floor(Math.random() * ITEMS.length) + state.permanent.crateLuck) % ITEMS.length];
-    state.inventory[item.id] = (state.inventory[item.id] || 0) + 1;
-    useItem(item); say(`Crate opened: ${item.name} (${item.rarity})`); save();
+    
+    // Add lootbox to inventory instead of opening immediately
+    const lootbox = {
+      id: Math.random().toString(36).slice(2),
+      type: Math.random() > 0.85 ? "epic" : Math.random() > 0.6 ? "rare" : "standard",
+      collectedAt: Date.now()
+    };
+    state.lootboxes.push(lootbox);
+    say(`Lootbox collected! (${lootbox.type})`); 
+    save();
     if (panel.classList.contains(`${ROOT}-open`)) openPanel(state.panelTab);
+  };
+
+  const openLootbox = (lootboxId) => {
+    const idx = state.lootboxes.findIndex(lb => lb.id === lootboxId);
+    if (idx === -1) return;
+    
+    const lootbox = state.lootboxes[idx];
+    const rewardCount = lootbox.type === "standard" ? 1 : lootbox.type === "rare" ? 2 : 3;
+    
+    // Generate final rewards with weighted rarity
+    const finalRewards = [];
+    for (let i = 0; i < rewardCount; i++) {
+      finalRewards.push(getRandomAddon());
+    }
+    
+    // Show CS-GO style opening animation
+    showLootboxOpening(lootboxId, finalRewards, () => {
+      // Remove lootbox and add rewards
+      state.lootboxes.splice(idx, 1);
+      
+      const rewardNames = [];
+      for (const addon of finalRewards) {
+        state.addons.push({
+          id: Math.random().toString(36).slice(2),
+          ...addon,
+          unlockedAt: Date.now()
+        });
+        rewardNames.push(`${addon.name} (${addon.rarity})`);
+      }
+      
+      say(`Lootbox opened! Got: ${rewardNames.join(", ")}`);
+      save();
+      if (panel.classList.contains(`${ROOT}-open`)) openPanel("inventory");
+    });
+  };
+
+  const showLootboxOpening = (lootboxId, finalRewards, onComplete) => {
+    // Close current panel
+    panel.classList.remove(`${ROOT}-open`);
+    
+    // Create modal overlay
+    const modal = document.createElement("div");
+    modal.style.cssText = `
+      position: fixed; inset: 0; z-index: 9999; background: rgba(0, 0, 0, 0.95);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-family: ui-monospace, monospace; color: #f8fafc;
+    `;
+    
+    // Title
+    const title = document.createElement("div");
+    title.style.cssText = `
+      font-size: 24px; font-weight: bold; margin-bottom: 40px;
+      color: #fbbf24; text-shadow: 0 0 20px #fbbf24;
+      animation: pulse-glow 0.6s ease-out forwards;
+    `;
+    title.textContent = "Opening Lootbox...";
+    modal.appendChild(title);
+    
+    // Generate many addon options for scrolling (includes final rewards)
+    const rarityColors = {
+      "common": "#94a3b8",
+      "uncommon": "#4ade80",
+      "rare": "#60a5fa",
+      "epic": "#f59e0b"
+    };
+    
+    // Create scrollable items - lots of random addons + final rewards
+    const scrollItems = [];
+    for (let i = 0; i < 25; i++) {
+      scrollItems.push(getRandomAddon());
+    }
+    // Insert final rewards at the end
+    for (const reward of finalRewards) {
+      scrollItems.push(reward);
+    }
+    
+    // Container for the scrolling animation
+    const wheelContainer = document.createElement("div");
+    wheelContainer.style.cssText = `
+      position: relative; width: 500px; height: 150px;
+      background: linear-gradient(90deg, rgba(15, 23, 42, 0.5), rgba(30, 58, 95, 0.8), rgba(15, 23, 42, 0.5));
+      border: 3px solid #60a5fa;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 50px #60a5fa, inset 0 0 30px rgba(96, 165, 250, 0.2);
+      display: flex;
+      align-items: center;
+    `;
+    
+    // Scrolling track
+    const track = document.createElement("div");
+    track.style.cssText = `
+      display: flex; gap: 12px; padding: 12px;
+      animation: scroll-items 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    `;
+    
+    // Create item elements
+    scrollItems.forEach((addon, idx) => {
+      const item = document.createElement("div");
+      const isReward = idx >= scrollItems.length - finalRewards.length;
+      const color = rarityColors[addon.rarity] || "#94a3b8";
+      
+      item.style.cssText = `
+        flex-shrink: 0;
+        width: 140px;
+        height: 120px;
+        padding: 12px;
+        background: rgba(15, 23, 42, 0.9);
+        border: 2px solid ${isReward ? color : "#475569"};
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        box-shadow: ${isReward ? `0 0 20px ${color}, inset 0 0 10px ${color}` : "none"};
+        transition: all 0.3s;
+      `;
+      
+      // Addon name
+      const name = document.createElement("div");
+      name.style.cssText = `
+        font-weight: bold;
+        font-size: 11px;
+        color: ${isReward ? color : "#cbd5e1"};
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      `;
+      name.textContent = addon.name;
+      item.appendChild(name);
+      
+      // Rarity badge
+      const rarity = document.createElement("div");
+      rarity.style.cssText = `
+        font-size: 9px;
+        color: ${color};
+        font-weight: bold;
+        padding: 2px 6px;
+        background: rgba(${color === "#94a3b8" ? "148,163,184" : color === "#4ade80" ? "74,222,128" : color === "#60a5fa" ? "96,165,250" : "245,158,11"},0.2);
+        border-radius: 3px;
+        text-transform: uppercase;
+      `;
+      rarity.textContent = addon.rarity;
+      item.appendChild(rarity);
+      
+      // Stat info
+      const stat = document.createElement("div");
+      stat.style.cssText = `
+        font-size: 8px;
+        color: #94a3b8;
+        margin-top: 4px;
+      `;
+      stat.textContent = `${addon.stat}: ${addon.value > 0 ? "+" : ""}${addon.value}`;
+      item.appendChild(stat);
+      
+      track.appendChild(item);
+    });
+    
+    wheelContainer.appendChild(track);
+    
+    // Glow effect in center
+    const centerGlow = document.createElement("div");
+    centerGlow.style.cssText = `
+      position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px; height: 140px;
+      border: 2px solid #fbbf24;
+      border-radius: 8px;
+      pointer-events: none;
+      box-shadow: inset 0 0 40px rgba(251, 191, 36, 0.3), 0 0 30px rgba(251, 191, 36, 0.5);
+    `;
+    wheelContainer.appendChild(centerGlow);
+    
+    modal.appendChild(wheelContainer);
+    
+    // Add CSS animations
+    if (!document.getElementById(`${ROOT}-csgo-lootbox-style`)) {
+      const style = document.createElement("style");
+      style.id = `${ROOT}-csgo-lootbox-style`;
+      style.textContent = `
+        @keyframes scroll-items {
+          0% {
+            transform: translateX(0);
+          }
+          95% {
+            transform: translateX(calc(-${scrollItems.length - 2} * 152px));
+          }
+          100% {
+            transform: translateX(calc(-${scrollItems.length - 2} * 152px));
+          }
+        }
+        @keyframes pulse-glow {
+          0% { opacity: 0; text-shadow: 0 0 0 #fbbf24; }
+          100% { opacity: 1; text-shadow: 0 0 20px #fbbf24; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    // Add result text
+    const resultText = document.createElement("div");
+    resultText.style.cssText = `
+      margin-top: 40px;
+      font-size: 14px;
+      color: #cbd5e1;
+      opacity: 0;
+      animation: fade-in-result 0.5s ease-out 3.8s forwards;
+      text-align: center;
+    `;
+    
+    const rewardDescriptions = finalRewards.map(r => `<span style="color: ${rarityColors[r.rarity]}">${r.name}</span>`).join(", ");
+    resultText.innerHTML = `Got: ${rewardDescriptions}`;
+    modal.appendChild(resultText);
+    
+    // Add fade-in animation for result
+    if (!document.getElementById(`${ROOT}-result-style`)) {
+      const style = document.createElement("style");
+      style.id = `${ROOT}-result-style`;
+      style.textContent = `
+        @keyframes fade-in-result {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(modal);
+    
+    // Close modal and complete after animation
+    setTimeout(() => {
+      modal.remove();
+      onComplete();
+    }, 4500);
   };
 
   const setSkin = (id) => {
@@ -1178,6 +1963,7 @@
     hud.querySelector(`#${ROOT}-crate`).textContent = `Crates: ${state.stats.cratesOpened} | Achievements: ${Object.keys(state.achievements).length}`;
     hud.querySelector(`#${ROOT}-platform`).textContent = `Platform: ${game.currentPlatform?.source?.tagName?.toLowerCase() || "none"}${game.currentPlatform?.isSubplatform ? " (sub)" : ""}`;
     hud.querySelector(`#${ROOT}-mode`).textContent = `Mode: ${game.customLevel ? "level - " + game.customLevel.name : "page"}${game.multiplayer.pvpEnabled ? " ⚔ PvP" : ""}`;
+    renderWeapon();
   };
 
   const jump = () => {
@@ -1349,6 +2135,23 @@
   say("Page Climber started. I inventory, J achievements, K skins, L levels, M multiplayer, F attack.");
   requestAnimationFrame(loop);
 
+  const saveWeapon = (wpn) => {
+    if (!wpn || !wpn.name) return false;
+    if (!state.weapons) state.weapons = [];
+    const idx = state.weapons.findIndex(w => w.name === wpn.name);
+    if (idx !== -1) {
+      state.weapons[idx] = wpn;
+      say(`Weapon updated: ${wpn.name}`);
+    } else {
+      state.weapons.push(wpn);
+      say(`Weapon saved: ${wpn.name}`);
+    }
+    save();
+    return true;
+  };
+
+  const getWeapons = () => state.weapons || [];
+
   window.PageClimber = {
     exportSave, importSave, loadLevel, clearLevel, pickLevelFile,
     connectMultiplayer, disconnectMultiplayer,
@@ -1357,6 +2160,7 @@
     setSkin, openPanel,
     closePanel: () => panel.classList.remove(`${ROOT}-open`),
     loadWeapon: (wpn) => { pvp.weapon = wpn; updateWeaponUI(); say("Weapon loaded: " + wpn.name); },
+    saveWeapon, getWeapons,
     secret, resetSave, save: state, destroy
   };
 })();
