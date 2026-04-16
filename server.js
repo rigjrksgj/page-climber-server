@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const { randomUUID } = require("crypto");
+const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
 const { WebSocketServer, WebSocket } = require("ws");
 const http = require("http");
 
@@ -12,6 +14,9 @@ const wss = new WebSocketServer({ noServer: true });
 const DB = "./levels.json";
 const LB = "./leaderboard.json";
 const PS = "./persistent-servers.json";
+const USERS = "./users.json";
+const LOGS = "./activity-logs.json";
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
@@ -24,6 +29,34 @@ const loadLb = () => { try { return JSON.parse(fs.readFileSync(LB, "utf8")); } c
 const persistLb = (d) => fs.writeFileSync(LB, JSON.stringify(d, null, 2));
 const loadPs = () => { try { return JSON.parse(fs.readFileSync(PS, "utf8")); } catch { return []; } };
 const persistPs = (d) => fs.writeFileSync(PS, JSON.stringify(d, null, 2));
+const loadUsers = () => { try { return JSON.parse(fs.readFileSync(USERS, "utf8")); } catch { return []; } };
+const persistUsers = (d) => fs.writeFileSync(USERS, JSON.stringify(d, null, 2));
+const loadLogs = () => { try { return JSON.parse(fs.readFileSync(LOGS, "utf8")); } catch { return []; } };
+const persistLogs = (d) => fs.writeFileSync(LOGS, JSON.stringify(d, null, 2));
+
+// ── Auth helpers ──────────────────────────────────────────────
+const hashPassword = (pwd) => crypto.createHash("sha256").update(pwd).digest("hex");
+const verifyPassword = (pwd, hash) => hashPassword(pwd) === hash;
+const generateToken = (userId) => jwt.sign({ userId }, JWT_SECRET, { expiresIn: "30d" });
+const verifyToken = (token) => { try { return jwt.verify(token, JWT_SECRET); } catch { return null; } };
+
+const logActivity = (action, details) => {
+  const logs = loadLogs();
+  logs.push({ timestamp: Date.now(), action, ...details });
+  persistLogs(logs.slice(-500));
+};
+
+const verifyAdmin = (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ error: "No token" });
+  const decoded = verifyToken(token);
+  if (!decoded) return res.status(401).json({ error: "Invalid token" });
+  const users = loadUsers();
+  const user = users.find(u => u.id === decoded.userId);
+  if (!user || !user.isAdmin) return res.status(403).json({ error: "Admin access required" });
+  req.user = user;
+  next();
+};
 
 // ── HTTP routes ───────────────────────────────────────────────
 app.get("/", (req, res) => res.json({ ok: true, service: "page-climber-server" }));
@@ -96,6 +129,58 @@ app.post("/leaderboard", (req, res) => {
 });
 
 app.get("/leaderboard", (req, res) => res.json({ entries: loadLb().slice(0, 20) }));
+
+// ── Authentication ────────────────────────────────────────────
+app.post("/register", (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) return res.status(400).json({ error: "Missing username or password" });
+  if (username.length < 3 || username.length > 32) return res.status(400).json({ error: "Username must be 3-32 chars" });
+  if (password.length < 6) return res.status(400).json({ error: "Password must be 6+ chars" });
+  
+  const users = loadUsers();
+  if (users.find(u => u.username === username)) return res.status(409).json({ error: "Username already exists" });
+  
+  const user = {
+    id: randomUUID(),
+    username: username.toLowerCase(),
+    passwordHash: hashPassword(password),
+    isAdmin: false,
+    isBanned: false,
+    createdAt: Date.now()
+  };
+  users.push(user);
+  persistUsers(users);
+  logActivity("user_registered", { userId: user.id, username: user.username });
+  res.json({ ok: true, token: generateToken(user.id), user: { id: user.id, username: user.username, isAdmin: false } });
+});
+
+app.post("/login", (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) return res.status(400).json({ error: "Missing username or password" });
+  
+  const users = loadUsers();
+  const user = users.find(u => u.username === username.toLowerCase());
+  if (!user || !verifyPassword(password, user.passwordHash)) return res.status(401).json({ error: "Invalid credentials" });
+  if (user.isBanned) return res.status(403).json({ error: "This account is banned" });
+  
+  logActivity("user_login", { userId: user.id, username: user.username });
+  res.json({ ok: true, token: generateToken(user.id), user: { id: user.id, username: user.username, isAdmin: user.isAdmin } });
+});
+
+app.post("/verify", (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ error: "No token" });
+  
+  const decoded = verifyToken(token);
+  if (!decoded) return res.status(401).json({ error: "Invalid token" });
+  
+  const users = loadUsers();
+  const user = users.find(u => u.id === decoded.userId);
+  if (!user) return res.status(401).json({ error: "User not found" });
+  if (user.isBanned) return res.status(403).json({ error: "This account is banned" });
+  
+  res.json({ ok: true, user: { id: user.id, username: user.username, isAdmin: user.isAdmin } });
+});
 
 // ── Persistent Servers ────────────────────────────────────────
 app.post("/persistent-servers", (req, res) => {
@@ -178,6 +263,67 @@ app.delete("/persistent-servers/:id", (req, res) => {
   
   servers.splice(idx, 1);
   persistPs(servers);
+  res.json({ ok: true });
+});
+
+// ── Admin Routes ──────────────────────────────────────────────
+app.get("/admin/logs", verifyAdmin, (req, res) => {
+  const logs = loadLogs().slice(-100);
+  res.json({ logs });
+});
+
+app.get("/admin/users", verifyAdmin, (req, res) => {
+  const users = loadUsers().map(u => ({ id: u.id, username: u.username, isAdmin: u.isAdmin, isBanned: u.isBanned, createdAt: u.createdAt }));
+  res.json({ users });
+});
+
+app.post("/admin/ban/:userId", verifyAdmin, (req, res) => {
+  const users = loadUsers();
+  const idx = users.findIndex(u => u.id === req.params.userId);
+  if (idx === -1) return res.status(404).json({ error: "User not found" });
+  users[idx].isBanned = true;
+  persistUsers(users);
+  logActivity("admin_ban", { adminId: req.user.id, userId: users[idx].id, username: users[idx].username });
+  res.json({ ok: true });
+});
+
+app.post("/admin/unban/:userId", verifyAdmin, (req, res) => {
+  const users = loadUsers();
+  const idx = users.findIndex(u => u.id === req.params.userId);
+  if (idx === -1) return res.status(404).json({ error: "User not found" });
+  users[idx].isBanned = false;
+  persistUsers(users);
+  logActivity("admin_unban", { adminId: req.user.id, userId: users[idx].id, username: users[idx].username });
+  res.json({ ok: true });
+});
+
+app.get("/admin/servers", verifyAdmin, (req, res) => {
+  const servers = loadPs().map(s => ({ id: s.id, name: s.name, creatorName: s.creatorName, playerCount: s.playerCount, maxPlayers: s.maxPlayers, createdAt: s.createdAt, lastActivityAt: s.lastActivityAt }));
+  res.json({ servers });
+});
+
+app.delete("/admin/servers/:id", verifyAdmin, (req, res) => {
+  const servers = loadPs();
+  const idx = servers.findIndex(s => s.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: "Server not found" });
+  
+  const server = servers[idx];
+  // Find and delete the persistent room
+  for (const [code, room] of Object.entries(persistentRooms)) {
+    if (room.serverId === server.id) {
+      delete persistentRooms[code];
+    }
+  }
+  
+  servers.splice(idx, 1);
+  persistPs(servers);
+  logActivity("admin_delete_server", { adminId: req.user.id, serverId: server.id, serverName: server.name });
+  res.json({ ok: true });
+});
+
+app.post("/admin/reset-leaderboard", verifyAdmin, (req, res) => {
+  persistLb([]);
+  logActivity("admin_reset_leaderboard", { adminId: req.user.id });
   res.json({ ok: true });
 });
 

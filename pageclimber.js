@@ -2,7 +2,67 @@
   if (window.PageClimber?.destroy) window.PageClimber.destroy();
   const API_URL = "https://page-climber-server.onrender.com";
   const KEY = "page-climber-save-v2";
+  const AUTH_KEY = "page-climber-auth";
   const ROOT = "page-climber-root";
+  
+  // ── Auth utilities ────────────────────────────────────────────
+  let authToken = localStorage.getItem(AUTH_KEY);
+  let currentUser = null;
+  
+  const login = async (username, password) => {
+    try {
+      const res = await fetch(API_URL + "/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (!res.ok) return { error: data.error || "Login failed" };
+      authToken = data.token;
+      currentUser = data.user;
+      localStorage.setItem(AUTH_KEY, authToken);
+      say("Logged in as " + currentUser.username);
+      return { ok: true, user: currentUser };
+    } catch (e) { return { error: "Network error" }; }
+  };
+  
+  const register = async (username, password) => {
+    try {
+      const res = await fetch(API_URL + "/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (!res.ok) return { error: data.error || "Registration failed" };
+      authToken = data.token;
+      currentUser = data.user;
+      localStorage.setItem(AUTH_KEY, authToken);
+      say("Account created! Welcome " + currentUser.username);
+      return { ok: true, user: currentUser };
+    } catch (e) { return { error: "Network error" }; }
+  };
+  
+  const logout = () => {
+    authToken = null;
+    currentUser = null;
+    localStorage.removeItem(AUTH_KEY);
+    say("Logged out");
+  };
+  
+  const verifyAuth = async () => {
+    if (!authToken) return null;
+    try {
+      const res = await fetch(API_URL + "/verify", {
+        headers: { "Authorization": "Bearer " + authToken }
+      });
+      if (!res.ok) { authToken = null; localStorage.removeItem(AUTH_KEY); return null; }
+      const data = await res.json();
+      currentUser = data.user;
+      return currentUser;
+    } catch { return null; }
+  };
+  
   const ITEMS = [];
   const BASE_ITEMS = [
     ["Spring Boots", "jump", 18, "common"],
@@ -297,7 +357,7 @@
     if (!state.unlockedSkins.includes(state.currentSkin)) state.currentSkin = state.unlockedSkins[0] || "rookie";
   };
 
-  const getUsername = () => state.username || "Anonymous";
+  const getUsername = () => currentUser ? currentUser.username : (state.username || "Anonymous");
 
   // ── Styles ────────────────────────────────────────────────────
   const style = document.createElement("style");
@@ -368,7 +428,7 @@
   // ── DOM ───────────────────────────────────────────────────────
   const hud = document.createElement("div");
   hud.id = `${ROOT}-hud`;
-  hud.innerHTML = `<button id="${ROOT}-toggle-hud" title="Toggle">«</button><h1>Page Climber</h1><p id="${ROOT}-username-display">Player: ${getUsername() || "not set"}</p><p id="${ROOT}-progress">Height: 0%</p><p id="${ROOT}-stats">Speed: 0 | Jump: 0</p><p id="${ROOT}-skin">Skin: ${state.currentSkin}</p><p id="${ROOT}-crate">Crates: ${state.stats.cratesOpened}</p><p id="${ROOT}-platform">Platform: none</p><p id="${ROOT}-mode">Mode: page</p><p id="${ROOT}-help">I inventory | J achievements | K skins | L levels | M multiplayer | F attack | S drop</p><div id="${ROOT}-controls"><button class="${ROOT}-button" id="${ROOT}-open-inventory">Inventory</button><button class="${ROOT}-button" id="${ROOT}-open-achievements">Achievements</button><button class="${ROOT}-button" id="${ROOT}-open-skins">Skins</button><button class="${ROOT}-button" id="${ROOT}-open-levels">Levels</button><button class="${ROOT}-button" id="${ROOT}-open-multi">Multiplayer</button><button class="${ROOT}-button" id="${ROOT}-open-profile">Profile</button></div>`;
+  hud.innerHTML = `<button id="${ROOT}-toggle-hud" title="Toggle">«</button><h1>Page Climber</h1><p id="${ROOT}-username-display">Player: ${getUsername() || "not set"}</p><p id="${ROOT}-progress">Height: 0%</p><p id="${ROOT}-stats">Speed: 0 | Jump: 0</p><p id="${ROOT}-skin">Skin: ${state.currentSkin}</p><p id="${ROOT}-crate">Crates: ${state.stats.cratesOpened}</p><p id="${ROOT}-platform">Platform: none</p><p id="${ROOT}-mode">Mode: page</p><p id="${ROOT}-help">I inventory | J achievements | K skins | L levels | M multiplayer | F attack | S drop</p><div id="${ROOT}-controls"><button class="${ROOT}-button" id="${ROOT}-open-inventory">Inventory</button><button class="${ROOT}-button" id="${ROOT}-open-achievements">Achievements</button><button class="${ROOT}-button" id="${ROOT}-open-skins">Skins</button><button class="${ROOT}-button" id="${ROOT}-open-levels">Levels</button><button class="${ROOT}-button" id="${ROOT}-open-multi">Multiplayer</button><button class="${ROOT}-button" id="${ROOT}-open-profile">Account</button></div>`;
 
   const panel = document.createElement("div");
   panel.id = `${ROOT}-panel`;
@@ -1134,6 +1194,38 @@
         ) +
         '<button class="' + ROOT + '-button" data-close="1">Close</button>'
       );
+    },
+    account() {
+      return (
+        '<h2>Account</h2>' +
+        (currentUser ?
+          '<div class="' + ROOT + '-entry"><strong>Logged in as <span style="color:#60a5fa">' + currentUser.username + '</span></strong>' +
+          '<span class="' + ROOT + '-muted">Status: ' + (currentUser.isAdmin ? 'Admin' : 'Player') + '</span>' +
+          '<div style="margin-top:8px"><button class="' + ROOT + '-button" data-action="logout">Logout</button>' +
+          (currentUser.isAdmin ? ' <button class="' + ROOT + '-button" data-action="admin-panel">Admin Panel</button>' : '') +
+          '</div></div>'
+        :
+          '<div class="' + ROOT + '-entry"><strong>Login or Register</strong>' +
+          '<div style="margin-top:8px">' +
+          '<input id="' + ROOT + '-username-input" placeholder="Username" maxlength="32" style="width:100%;padding:8px;border-radius:4px;border:1px solid rgba(96,165,250,.5);background:rgba(30,41,59,.9);color:#fff;font:inherit;outline:none;margin-bottom:6px">' +
+          '<input id="' + ROOT + '-password-input" type="password" placeholder="Password" maxlength="64" style="width:100%;padding:8px;border-radius:4px;border:1px solid rgba(96,165,250,.5);background:rgba(30,41,59,.9);color:#fff;font:inherit;outline:none;margin-bottom:6px">' +
+          '<button class="' + ROOT + '-button" data-action="login" style="width:100%">Login</button>' +
+          '<button class="' + ROOT + '-button" data-action="register" style="width:100%;margin-top:6px">Create Account</button>' +
+          '</div></div>'
+        ) +
+        '<button class="' + ROOT + '-button" data-close="1">Close</button>'
+      );
+    },
+    admin() {
+      return (
+        '<h2>Admin Panel</h2>' +
+        '<div class="' + ROOT + '-entry"><strong>Server Management</strong>' +
+        '<div style="margin-top:8px"><button class="' + ROOT + '-button" data-action="view-servers">View Servers</button> <button class="' + ROOT + '-button" data-action="view-users">View Users</button> <button class="' + ROOT + '-button" data-action="view-logs">View Logs</button></div></div>' +
+        '<div class="' + ROOT + '-entry"><strong>Actions</strong>' +
+        '<div style="margin-top:8px"><button class="' + ROOT + '-button" data-action="reset-lb">Reset Leaderboard</button></div></div>' +
+        '<div id="' + ROOT + '-admin-content" style="margin-top:10px"></div>' +
+        '<button class="' + ROOT + '-button" data-close="1">Close</button>'
+      );
     }
   };
 
@@ -1397,6 +1489,124 @@
       });
     });
     content.querySelectorAll("[data-action='mp-leave']").forEach(function(btn) { btn.addEventListener("click", function() { disconnectMultiplayer(); openPanel("multi"); }); });
+
+    // Auth listeners
+    content.querySelectorAll("[data-action='login']").forEach(function(btn) {
+      btn.addEventListener("click", async function() {
+        const username = content.querySelector("#" + ROOT + "-username-input")?.value || "";
+        const password = content.querySelector("#" + ROOT + "-password-input")?.value || "";
+        if (!username || !password) { say("Enter username and password"); return; }
+        const result = await login(username, password);
+        if (result.error) { say("Login failed: " + result.error); } else { openPanel("account"); }
+      });
+    });
+
+    content.querySelectorAll("[data-action='register']").forEach(function(btn) {
+      btn.addEventListener("click", async function() {
+        const username = content.querySelector("#" + ROOT + "-username-input")?.value || "";
+        const password = content.querySelector("#" + ROOT + "-password-input")?.value || "";
+        if (!username || !password) { say("Enter username and password"); return; }
+        const result = await register(username, password);
+        if (result.error) { say("Registration failed: " + result.error); } else { openPanel("account"); }
+      });
+    });
+
+    content.querySelectorAll("[data-action='logout']").forEach(function(btn) {
+      btn.addEventListener("click", function() { logout(); openPanel("account"); });
+    });
+
+    content.querySelectorAll("[data-action='admin-panel']").forEach(function(btn) {
+      btn.addEventListener("click", function() { openPanel("admin"); });
+    });
+
+    // Admin panel listeners
+    content.querySelectorAll("[data-action='view-servers']").forEach(function(btn) {
+      btn.addEventListener("click", async function() {
+        const adminContent = content.querySelector("#" + ROOT + "-admin-content");
+        adminContent.textContent = "Loading servers...";
+        try {
+          const res = await fetch(API_URL + "/admin/servers", { headers: { "Authorization": "Bearer " + authToken } });
+          const data = await res.json();
+          if (!res.ok) { adminContent.textContent = "Error: " + data.error; return; }
+          adminContent.innerHTML = data.servers.map(function(s) {
+            return '<div class="' + ROOT + '-entry" style="margin-bottom:8px"><strong>' + s.name + '</strong>' +
+              '<span class="' + ROOT + '-muted">by ' + s.creatorName + ' | Players: ' + s.playerCount + '/' + s.maxPlayers + '</span>' +
+              '<div style="margin-top:6px"><button class="' + ROOT + '-button" data-delete-server="' + s.id + '" style="background:#ef4444">Delete Server</button></div></div>';
+          }).join("");
+          adminContent.querySelectorAll("[data-delete-server]").forEach(function(dbtn) {
+            dbtn.addEventListener("click", async function() {
+              if (!confirm("Delete server?")) return;
+              dbtn.disabled = true;
+              const dres = await fetch(API_URL + "/admin/servers/" + dbtn.dataset.deleteServer, { method: "DELETE", headers: { "Authorization": "Bearer " + authToken } });
+              if (dres.ok) { say("Server deleted"); content.querySelector("[data-action='view-servers']").click(); } else { say("Delete failed"); }
+              dbtn.disabled = false;
+            });
+          });
+        } catch { adminContent.textContent = "Network error"; }
+      });
+    });
+
+    content.querySelectorAll("[data-action='view-users']").forEach(function(btn) {
+      btn.addEventListener("click", async function() {
+        const adminContent = content.querySelector("#" + ROOT + "-admin-content");
+        adminContent.textContent = "Loading users...";
+        try {
+          const res = await fetch(API_URL + "/admin/users", { headers: { "Authorization": "Bearer " + authToken } });
+          const data = await res.json();
+          if (!res.ok) { adminContent.textContent = "Error: " + data.error; return; }
+          adminContent.innerHTML = data.users.map(function(u) {
+            return '<div class="' + ROOT + '-entry" style="margin-bottom:8px"><strong>' + u.username + '</strong>' +
+              '<span class="' + ROOT + '-muted"> | ' + (u.isAdmin ? 'Admin' : 'Player') + (u.isBanned ? ' | BANNED' : '') + '</span>' +
+              '<div style="margin-top:6px">' +
+              (u.isBanned ? '<button class="' + ROOT + '-button" data-unban-user="' + u.id + '" style="background:#84cc16">Unban</button>' : '<button class="' + ROOT + '-button" data-ban-user="' + u.id + '" style="background:#ef4444">Ban</button>') +
+              '</div></div>';
+          }).join("");
+          adminContent.querySelectorAll("[data-ban-user]").forEach(function(bbtn) {
+            bbtn.addEventListener("click", async function() {
+              if (!confirm("Ban user?")) return;
+              bbtn.disabled = true;
+              const bres = await fetch(API_URL + "/admin/ban/" + bbtn.dataset.banUser, { method: "POST", headers: { "Authorization": "Bearer " + authToken } });
+              if (bres.ok) { say("User banned"); content.querySelector("[data-action='view-users']").click(); } else { say("Ban failed"); }
+              bbtn.disabled = false;
+            });
+          });
+          adminContent.querySelectorAll("[data-unban-user]").forEach(function(ubtn) {
+            ubtn.addEventListener("click", async function() {
+              if (!confirm("Unban user?")) return;
+              ubtn.disabled = true;
+              const ures = await fetch(API_URL + "/admin/unban/" + ubtn.dataset.unbanUser, { method: "POST", headers: { "Authorization": "Bearer " + authToken } });
+              if (ures.ok) { say("User unbanned"); content.querySelector("[data-action='view-users']").click(); } else { say("Unban failed"); }
+              ubtn.disabled = false;
+            });
+          });
+        } catch { adminContent.textContent = "Network error"; }
+      });
+    });
+
+    content.querySelectorAll("[data-action='view-logs']").forEach(function(btn) {
+      btn.addEventListener("click", async function() {
+        const adminContent = content.querySelector("#" + ROOT + "-admin-content");
+        adminContent.textContent = "Loading logs...";
+        try {
+          const res = await fetch(API_URL + "/admin/logs", { headers: { "Authorization": "Bearer " + authToken } });
+          const data = await res.json();
+          if (!res.ok) { adminContent.textContent = "Error: " + data.error; return; }
+          adminContent.innerHTML = '<div style="font-size:12px;color:#a0aec0;max-height:400px;overflow-y:auto">' + data.logs.slice(-50).reverse().map(function(log) {
+            return '<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,.1)">' + new Date(log.timestamp).toLocaleTimeString() + ' - ' + log.action + '</div>';
+          }).join("") + '</div>';
+        } catch { adminContent.textContent = "Network error"; }
+      });
+    });
+
+    content.querySelectorAll("[data-action='reset-lb']").forEach(function(btn) {
+      btn.addEventListener("click", async function() {
+        if (!confirm("Reset leaderboard? This cannot be undone!")) return;
+        btn.disabled = true;
+        const res = await fetch(API_URL + "/admin/reset-leaderboard", { method: "POST", headers: { "Authorization": "Bearer " + authToken } });
+        if (res.ok) { say("Leaderboard reset"); } else { say("Reset failed"); }
+        btn.disabled = false;
+      });
+    });
 
     if (tab === "levels") fetchAndRenderLevels();
     if (tab === "leaderboard") fetchAndRenderLeaderboard();
@@ -2089,8 +2299,13 @@
   hud.querySelector(`#${ROOT}-open-skins`).addEventListener("click", () => openPanel("skins"));
   hud.querySelector(`#${ROOT}-open-levels`).addEventListener("click", () => openPanel("levels"));
   hud.querySelector(`#${ROOT}-open-multi`).addEventListener("click", () => openPanel("multi"));
-  hud.querySelector(`#${ROOT}-open-profile`).addEventListener("click", () => openPanel("profile"));
+  hud.querySelector(`#${ROOT}-open-profile`).addEventListener("click", () => openPanel("account"));
   panel.querySelectorAll("[data-tab]").forEach((btn) => btn.addEventListener("click", () => openPanel(btn.dataset.tab)));
+
+  // Verify auth on load
+  verifyAuth().then(user => {
+    if (user) say("Logged in as " + user.username);
+  });
 
   const exportSave = () => {
     const payload = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
