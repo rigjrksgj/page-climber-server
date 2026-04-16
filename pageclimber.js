@@ -2324,6 +2324,32 @@
   }
 });
 
+  // Periodic ban check - verify user isn't banned every 30 seconds
+  setInterval(async () => {
+    if (!authToken || !currentUser) return;
+    try {
+      const res = await fetch(API_URL + "/verify", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + authToken }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user && data.user.isBanned && !currentUser.isBanned) {
+          // User was just banned!
+          say("You have been banned from the server.");
+          currentUser.isBanned = true;
+          // Close websocket if connected
+          if (window.PageClimber?.ws) {
+            try { window.PageClimber.ws.close(); } catch {}
+          }
+          logout();
+          setTimeout(() => location.reload(), 2000);
+        }
+        currentUser = data.user;
+      }
+    } catch {}
+  }, 30000);
+
   const exportSave = () => {
     const payload = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
     navigator.clipboard?.writeText(payload).catch(() => {});
