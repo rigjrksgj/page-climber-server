@@ -403,7 +403,6 @@ wss.on("connection", (ws) => {
       return;
     }
   });
-  });
 
   ws.on("close", () => {
     if (!playerId || !roomCode) return;
