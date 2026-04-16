@@ -17,6 +17,8 @@ const PS = "./persistent-servers.json";
 const USERS = "./users.json";
 const LOGS = "./activity-logs.json";
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
+const ADMIN_SECRET = process.env.ADMIN_SECRET || "change-me-in-production";
+const ADMIN_USERNAME = (process.env.ADMIN_USERNAME || "").toLowerCase();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
@@ -140,18 +142,22 @@ app.post("/register", (req, res) => {
   const users = loadUsers();
   if (users.find(u => u.username === username)) return res.status(409).json({ error: "Username already exists" });
   
+  // First user is always admin
+  const isFirstUser = users.length === 0;
+  const isAdmin = isFirstUser || (ADMIN_USERNAME && username.toLowerCase() === ADMIN_USERNAME);
+  
   const user = {
     id: randomUUID(),
     username: username.toLowerCase(),
     passwordHash: hashPassword(password),
-    isAdmin: false,
+    isAdmin: isAdmin,
     isBanned: false,
     createdAt: Date.now()
   };
   users.push(user);
   persistUsers(users);
-  logActivity("user_registered", { userId: user.id, username: user.username });
-  res.json({ ok: true, token: generateToken(user.id), user: { id: user.id, username: user.username, isAdmin: false } });
+  logActivity("user_registered", { userId: user.id, username: user.username, isAdmin });
+  res.json({ ok: true, token: generateToken(user.id), user: { id: user.id, username: user.username, isAdmin: isAdmin } });
 });
 
 app.post("/login", (req, res) => {
@@ -180,6 +186,21 @@ app.post("/verify", (req, res) => {
   if (user.isBanned) return res.status(403).json({ error: "This account is banned" });
   
   res.json({ ok: true, user: { id: user.id, username: user.username, isAdmin: user.isAdmin } });
+});
+
+app.post("/make-admin", (req, res) => {
+  const { username, secret } = req.body;
+  if (!username || !secret) return res.status(400).json({ error: "Missing username or secret" });
+  if (secret !== ADMIN_SECRET) return res.status(403).json({ error: "Invalid secret" });
+  
+  const users = loadUsers();
+  const idx = users.findIndex(u => u.username === username.toLowerCase());
+  if (idx === -1) return res.status(404).json({ error: "User not found" });
+  
+  users[idx].isAdmin = true;
+  persistUsers(users);
+  logActivity("admin_promoted", { username: users[idx].username });
+  res.json({ ok: true, message: `${username} is now an admin` });
 });
 
 // ── Persistent Servers ────────────────────────────────────────

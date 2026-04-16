@@ -53,9 +53,10 @@
   const verifyAuth = async () => {
     if (!authToken) return null;
     try {
-      const res = await fetch(API_URL + "/verify", {
-        headers: { "Authorization": "Bearer " + authToken }
-      });
+    const res = await fetch(API_URL + "/verify", {
+      method: "POST",  // ADD THIS
+      headers: { "Authorization": "Bearer " + authToken }
+    });
       if (!res.ok) { authToken = null; localStorage.removeItem(AUTH_KEY); return null; }
       const data = await res.json();
       currentUser = data.user;
@@ -432,7 +433,7 @@
 
   const panel = document.createElement("div");
   panel.id = `${ROOT}-panel`;
-  panel.innerHTML = `<div class="${ROOT}-tabs"><button class="${ROOT}-button" data-tab="inventory">Inventory</button><button class="${ROOT}-button" data-tab="achievements">Achievements</button><button class="${ROOT}-button" data-tab="skins">Skins</button><button class="${ROOT}-button" data-tab="levels">Levels</button><button class="${ROOT}-button" data-tab="multi">Multiplayer</button><button class="${ROOT}-button" data-tab="leaderboard">Leaderboard</button><button class="${ROOT}-button" data-tab="profile">Profile</button></div><div id="${ROOT}-panel-content"></div>`;
+  panel.innerHTML = `<div class="${ROOT}-tabs"><button class="${ROOT}-button" data-tab="inventory">Inventory</button><button class="${ROOT}-button" data-tab="achievements">Achievements</button><button class="${ROOT}-button" data-tab="skins">Skins</button><button class="${ROOT}-button" data-tab="levels">Levels</button><button class="${ROOT}-button" data-tab="multi">Multiplayer</button><button class="${ROOT}-button" data-tab="leaderboard">Leaderboard</button><button class="${ROOT}-button" data-tab="account">Account</button></div><div id="${ROOT}-panel-content"></div>`;
 
   const toast = document.createElement("div"); toast.id = `${ROOT}-toast`;
   const levelBg = document.createElement("div"); levelBg.id = `${ROOT}-level-bg`;
@@ -2267,6 +2268,10 @@
   };
 
   const onKeyDown = (event) => {
+    // Don't trigger game actions while typing in input fields
+    const activeElement = document.activeElement;
+    if (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA") return;
+    
     if (!game.running) return;
     const key = event.key.toLowerCase();
     game.keys.add(key);
@@ -2304,8 +2309,20 @@
 
   // Verify auth on load
   verifyAuth().then(user => {
-    if (user) say("Logged in as " + user.username);
-  });
+  if (user) {
+    // Sync the local state username with the logged-in account
+    state.username = user.username;
+    save();
+    say("Welcome back, " + user.username + "!");
+    const usernameDisplay = hud.querySelector("#" + ROOT + "-username-display");
+    if (usernameDisplay) usernameDisplay.textContent = "Player: " + user.username;
+    // Submit leaderboard with current completions under their account
+    submitLeaderboard(user.username, state.stats.levelCompletions);
+  } else {
+    // Token was invalid/expired — clear it silently
+    localStorage.removeItem(AUTH_KEY);
+  }
+});
 
   const exportSave = () => {
     const payload = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
