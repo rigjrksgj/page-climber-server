@@ -12,11 +12,6 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ noServer: true });
 
-const DB = "./levels.json";
-const LB = "./leaderboard.json";
-const PS = "./persistent-servers.json";
-const USERS = "./users.json";
-const LOGS = "./activity-logs.json";
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "change-me-in-production";
 const ADMIN_USERNAME = (process.env.ADMIN_USERNAME || "").toLowerCase();
@@ -36,13 +31,37 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.error("MongoDB connection error:", err));
 
+const levelSchema = new mongoose.Schema({
+  id: String,
+  name: String,
+  author: String,
+  uploadedAt: Number,
+  updatedAt: Number,
+  plays: { type: Number, default: 0 },
+  platforms: mongoose.Schema.Types.Mixed,
+  crates: mongoose.Schema.Types.Mixed,
+  finish: mongoose.Schema.Types.Mixed,
+  width: Number,
+  height: Number,
+  start: mongoose.Schema.Types.Mixed,
+  settings: mongoose.Schema.Types.Mixed
+});
+
 const userSchema = new mongoose.Schema({
   id: String,
   username: String,
+  deviceFingerprint: String,
   passwordHash: String,
   isAdmin: Boolean,
   isBanned: Boolean,
+  bannedDevice: Boolean,
   createdAt: Number
+});
+
+const bannedDeviceSchema = new mongoose.Schema({
+  fingerprint: String,
+  bannedAt: Number,
+  reason: String
 });
 
 const leaderboardSchema = new mongoose.Schema({
@@ -69,26 +88,12 @@ const logSchema = new mongoose.Schema({
   details: mongoose.Schema.Types.Mixed
 });
 
+const Level = mongoose.model("Level", levelSchema);
 const User = mongoose.model("User", userSchema);
 const Leaderboard = mongoose.model("Leaderboard", leaderboardSchema);
 const Server = mongoose.model("Server", serverSchema);
 const ActivityLog = mongoose.model("ActivityLog", logSchema);
-
-// ── DB helpers ────────────────────────────────────────────────
-const load = () => { try { return JSON.parse(fs.readFileSync(DB, "utf8")); } catch { return []; } };
-const persist = (d) => fs.writeFileSync(DB, JSON.stringify(d, null, 2));
-
-const loadLb = async () => { try { return await Leaderboard.find({}); } catch { return []; } };
-const persistLb = async (d) => { try { await Leaderboard.deleteMany({}); await Leaderboard.insertMany(d); } catch {} };
-
-const loadPs = async () => { try { return await Server.find({}); } catch { return []; } };
-const persistPs = async (d) => { try { await Server.deleteMany({}); await Server.insertMany(d); } catch {} };
-
-const loadUsers = async () => { try { return await User.find({}); } catch { return []; } };
-const persistUsers = async (d) => { try { await User.deleteMany({}); await User.insertMany(d); } catch {} };
-
-const loadLogs = async () => { try { return await ActivityLog.find({}).sort({ timestamp: -1 }).limit(500); } catch { return []; } };
-const persistLogs = async (d) => { try { await ActivityLog.insertOne(d); } catch {} };
+const BannedDevice = mongoose.model("BannedDevice", bannedDeviceSchema);
 
 // ── Auth helpers ──────────────────────────────────────────────
 const hashPassword = (pwd) => crypto.createHash("sha256").update(pwd).digest("hex");
@@ -118,59 +123,102 @@ const verifyAdmin = async (req, res, next) => {
 // ── HTTP routes ───────────────────────────────────────────────
 app.get("/", (req, res) => res.json({ ok: true, service: "page-climber-server" }));
 
-app.post("/levels", (req, res) => {
-  const { name, author, platforms, crates, finish, width, height, start, settings } = req.body;
-  if (!name || !Array.isArray(platforms)) return res.status(400).json({ error: "Missing name or platforms" });
-  const level = {
-    id: randomUUID(), name: String(name).slice(0, 64),
-    author: String(author || "Anonymous").slice(0, 32),
-    uploadedAt: Date.now(), plays: 0,
-    platforms, crates: crates || [], finish, width, height, start, settings
-  };
-  const levels = load();
-  levels.unshift(level);
-  persist(levels.slice(0, 500));
-  res.json({ ok: true, id: level.id });
+// ── Levels (now MongoDB) ──────────────────────────────────────
+app.post("/levels", async (req, res) => {
+  try {
+    const { name, author, platforms, crates, finish, width, height, start, settings } = req.body;
+    if (!name || !Array.isArray(platforms)) return res.status(400).json({ error: "Missing name or platforms" });
+    const level = await Level.create({
+      id: randomUUID(),
+      name: String(name).slice(0, 64),
+      author: String(author || "Anonymous").slice(0, 32),
+      uploadedAt: Date.now(),
+      plays: 0,
+      platforms,
+      crates: crates || [],
+      finish,
+      width,
+      height,
+      start,
+      settings
+    });
+    res.json({ ok: true, id: level.id });
+  } catch (err) {
+    console.error("Error creating level:", err);
+    res.status(500).json({ error: "Failed to save level" });
+  }
 });
 
-app.get("/levels", (req, res) => {
-  const page = Math.max(0, parseInt(req.query.page) || 0);
-  const limit = Math.min(20, parseInt(req.query.limit) || 10);
-  const levels = load();
-  res.json({
-    levels: levels.slice(page * limit, page * limit + limit).map(({ id, name, author, uploadedAt, plays, platforms }) => ({
-      id, name, author, uploadedAt, plays, platformCount: platforms.length
-    })),
-    total: levels.length
-  });
+app.get("/levels", async (req, res) => {
+  try {
+    const page = Math.max(0, parseInt(req.query.page) || 0);
+    const limit = Math.min(20, parseInt(req.query.limit) || 10);
+    const levels = await Level.find({}).sort({ uploadedAt: -1 }).skip(page * limit).limit(limit);
+    const total = await Level.countDocuments({});
+    res.json({
+      levels: levels.map(({ id, name, author, uploadedAt, plays, platforms }) => ({
+        id, name, author, uploadedAt, plays, platformCount: platforms.length
+      })),
+      total
+    });
+  } catch (err) {
+    console.error("Error fetching levels:", err);
+    res.status(500).json({ error: "Failed to fetch levels" });
+  }
 });
 
-app.get("/levels/:id", (req, res) => {
-  const levels = load();
-  const idx = levels.findIndex((l) => l.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: "Not found" });
-  levels[idx].plays += 1;
-  persist(levels);
-  res.json(levels[idx]);
+app.get("/levels/:id", async (req, res) => {
+  try {
+    const level = await Level.findOneAndUpdate(
+      { id: req.params.id },
+      { $inc: { plays: 1 } },
+      { new: true }
+    );
+    if (!level) return res.status(404).json({ error: "Not found" });
+    res.json(level);
+  } catch (err) {
+    console.error("Error fetching level:", err);
+    res.status(500).json({ error: "Failed to fetch level" });
+  }
 });
 
-app.delete("/levels/:id", (req, res) => {
-  const levels = load();
-  const filtered = levels.filter((l) => l.id !== req.params.id);
-  if (filtered.length === levels.length) return res.status(404).json({ error: "Not found" });
-  persist(filtered);
-  res.json({ ok: true });
+app.delete("/levels/:id", async (req, res) => {
+  try {
+    const result = await Level.deleteOne({ id: req.params.id });
+    if (result.deletedCount === 0) return res.status(404).json({ error: "Not found" });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Error deleting level:", err);
+    res.status(500).json({ error: "Failed to delete level" });
+  }
 });
 
-app.put("/levels/:id", (req, res) => {
-  const levels = load();
-  const idx = levels.findIndex((l) => l.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: "Not found" });
-  const { name, author, platforms, crates, finish, width, height, start, settings } = req.body;
-  if (!name || !Array.isArray(platforms)) return res.status(400).json({ error: "Missing name or platforms" });
-  levels[idx] = { ...levels[idx], name: String(name).slice(0, 64), author: String(author || "Anonymous").slice(0, 32), updatedAt: Date.now(), platforms, crates: crates || [], finish, width, height, start, settings };
-  persist(levels);
-  res.json({ ok: true, id: levels[idx].id });
+app.put("/levels/:id", async (req, res) => {
+  try {
+    const { name, author, platforms, crates, finish, width, height, start, settings } = req.body;
+    if (!name || !Array.isArray(platforms)) return res.status(400).json({ error: "Missing name or platforms" });
+    const level = await Level.findOneAndUpdate(
+      { id: req.params.id },
+      {
+        name: String(name).slice(0, 64),
+        author: String(author || "Anonymous").slice(0, 32),
+        updatedAt: Date.now(),
+        platforms,
+        crates: crates || [],
+        finish,
+        width,
+        height,
+        start,
+        settings
+      },
+      { new: true }
+    );
+    if (!level) return res.status(404).json({ error: "Not found" });
+    res.json({ ok: true, id: level.id });
+  } catch (err) {
+    console.error("Error updating level:", err);
+    res.status(500).json({ error: "Failed to update level" });
+  }
 });
 
 app.post("/leaderboard", async (req, res) => {
@@ -199,15 +247,17 @@ app.get("/leaderboard", async (req, res) => {
 // ── Authentication ────────────────────────────────────────────
 app.post("/register", async (req, res) => {
   try {
-    const { username, password } = req.body;
-    if (!username || !password) return res.status(400).json({ error: "Missing username or password" });
+    const { username, password, deviceFingerprint } = req.body;
+    if (!username || !password || !deviceFingerprint) return res.status(400).json({ error: "Missing required fields" });
     if (username.length < 3 || username.length > 32) return res.status(400).json({ error: "Username must be 3-32 chars" });
     if (password.length < 6) return res.status(400).json({ error: "Password must be 6+ chars" });
+    
+    const bannedDevice = await BannedDevice.findOne({ fingerprint: deviceFingerprint });
+    if (bannedDevice) return res.status(403).json({ error: "This device is banned and cannot create new accounts" });
     
     const existing = await User.findOne({ username: username.toLowerCase() });
     if (existing) return res.status(409).json({ error: "Username already exists" });
     
-    // First user is always admin
     const userCount = await User.countDocuments({});
     const isFirstUser = userCount === 0;
     const isAdmin = isFirstUser || (ADMIN_USERNAME && username.toLowerCase() === ADMIN_USERNAME);
@@ -215,9 +265,11 @@ app.post("/register", async (req, res) => {
     const user = await User.create({
       id: randomUUID(),
       username: username.toLowerCase(),
+      deviceFingerprint: deviceFingerprint,
       passwordHash: hashPassword(password),
       isAdmin: isAdmin,
       isBanned: false,
+      bannedDevice: false,
       createdAt: Date.now()
     });
     
@@ -228,12 +280,15 @@ app.post("/register", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   try {
-    const { username, password } = req.body;
-    if (!username || !password) return res.status(400).json({ error: "Missing username or password" });
+    const { username, password, deviceFingerprint } = req.body;
+    if (!username || !password || !deviceFingerprint) return res.status(400).json({ error: "Missing required fields" });
     
     const user = await User.findOne({ username: username.toLowerCase() });
     if (!user || !verifyPassword(password, user.passwordHash)) return res.status(401).json({ error: "Invalid credentials" });
     if (user.isBanned) return res.status(403).json({ error: "This account is banned" });
+    
+    const bannedDevice = await BannedDevice.findOne({ fingerprint: deviceFingerprint });
+    if (bannedDevice) return res.status(403).json({ error: "This device is banned" });
     
     await logActivity("user_login", { userId: user.id, username: user.username });
     res.json({ ok: true, token: generateToken(user.id), user: { id: user.id, username: user.username, isAdmin: user.isAdmin } });
@@ -294,7 +349,6 @@ app.post("/persistent-servers", async (req, res) => {
       roomCode: roomCode
     });
     
-    // Create persistent room on server
     persistentRooms[roomCode] = {
       serverId: server.id,
       players: {},
@@ -347,11 +401,8 @@ app.delete("/persistent-servers/:id", async (req, res) => {
     const server = await Server.findOne({ id: req.params.id });
     if (!server) return res.status(404).json({ error: "Server not found" });
     
-    // Find and delete the persistent room
     for (const [code, room] of Object.entries(persistentRooms)) {
-      if (room.serverId === server.id) {
-        delete persistentRooms[code];
-      }
+      if (room.serverId === server.id) delete persistentRooms[code];
     }
     
     await Server.deleteOne({ id: req.params.id });
@@ -369,16 +420,23 @@ app.get("/admin/logs", verifyAdmin, async (req, res) => {
 
 app.get("/admin/users", verifyAdmin, async (req, res) => {
   try {
-    const users = await User.find({}).select("id username isAdmin isBanned createdAt");
+    const users = await User.find({}).select("id username isAdmin isBanned bannedDevice createdAt");
     res.json({ users });
   } catch (err) { res.status(500).json({ error: "Error fetching users" }); }
 });
 
 app.post("/admin/ban/:userId", verifyAdmin, async (req, res) => {
   try {
+    const { banDevice } = req.body;
     const user = await User.findOneAndUpdate({ id: req.params.userId }, { isBanned: true }, { new: true });
     if (!user) return res.status(404).json({ error: "User not found" });
-    await logActivity("admin_ban", { adminId: req.user.id, userId: user.id, username: user.username });
+    
+    if (banDevice && user.deviceFingerprint) {
+      await BannedDevice.create({ fingerprint: user.deviceFingerprint, bannedAt: Date.now(), reason: "Account ban" });
+      await User.findOneAndUpdate({ id: req.params.userId }, { bannedDevice: true });
+    }
+    
+    await logActivity("admin_ban", { adminId: req.user.id, userId: user.id, username: user.username, banDevice });
     res.json({ ok: true });
   } catch (err) { res.status(500).json({ error: "Error banning user" }); }
 });
@@ -387,6 +445,12 @@ app.post("/admin/unban/:userId", verifyAdmin, async (req, res) => {
   try {
     const user = await User.findOneAndUpdate({ id: req.params.userId }, { isBanned: false }, { new: true });
     if (!user) return res.status(404).json({ error: "User not found" });
+    
+    if (user.deviceFingerprint) {
+      await BannedDevice.deleteOne({ fingerprint: user.deviceFingerprint });
+      await User.findOneAndUpdate({ id: req.params.userId }, { bannedDevice: false });
+    }
+    
     await logActivity("admin_unban", { adminId: req.user.id, userId: user.id, username: user.username });
     res.json({ ok: true });
   } catch (err) { res.status(500).json({ error: "Error unbanning user" }); }
@@ -404,11 +468,8 @@ app.delete("/admin/servers/:id", verifyAdmin, async (req, res) => {
     const server = await Server.findOne({ id: req.params.id });
     if (!server) return res.status(404).json({ error: "Server not found" });
     
-    // Find and delete the persistent room
     for (const [code, room] of Object.entries(persistentRooms)) {
-      if (room.serverId === server.id) {
-        delete persistentRooms[code];
-      }
+      if (room.serverId === server.id) delete persistentRooms[code];
     }
     
     await Server.deleteOne({ id: req.params.id });
@@ -426,8 +487,6 @@ app.post("/admin/reset-leaderboard", verifyAdmin, async (req, res) => {
 });
 
 // ── Multiplayer rooms ─────────────────────────────────────────
-// rooms[code] = { players: { id: { ws, x, y, name, color, hp, dead } }, currentLevel, pvpEnabled, hostId }
-// persistentRooms[code] = { serverId, players: {}, currentLevel, pvpEnabled, isPersistent: true }
 const rooms = {};
 const persistentRooms = {};
 
@@ -471,7 +530,6 @@ wss.on("connection", (ws) => {
     let msg;
     try { msg = JSON.parse(raw); } catch { return; }
 
-    // ── Create room ───────────────────────────────────────────
     if (msg.type === "create") {
       roomCode = generateCode();
       playerId = randomUUID();
@@ -485,7 +543,6 @@ wss.on("connection", (ws) => {
       return;
     }
 
-    // ── Join room ─────────────────────────────────────────────
     if (msg.type === "join") {
       const code = String(msg.room || "").toUpperCase().trim();
       let room = rooms[code] || persistentRooms[code];
@@ -502,7 +559,6 @@ wss.on("connection", (ws) => {
         ws.send(JSON.stringify({ type: "load-level", level: room.currentLevel }));
       }
       
-      // Update persistent server player count
       if (room.isPersistent) {
         Server.findOneAndUpdate({ id: room.serverId }, { 
           playerCount: Object.keys(room.players).length,
@@ -522,7 +578,6 @@ wss.on("connection", (ws) => {
       return;
     }
 
-    // ── Player state update ───────────────────────────────────
     if (msg.type === "player-state" && playerId && roomCode) {
       const room = rooms[roomCode] || persistentRooms[roomCode];
       if (!room) return;
@@ -541,24 +596,21 @@ wss.on("connection", (ws) => {
       return;
     }
 
-    // ── Load level ────────────────────────────────────────────
     if (msg.type === "load-level" && playerId && roomCode) {
       const room = rooms[roomCode] || persistentRooms[roomCode];
       if (!room) return;
-      if (room.hostId !== playerId && !room.isPersistent) return; // only host can in regular rooms, no one in persistent
+      if (room.hostId !== playerId && !room.isPersistent) return;
       room.currentLevel = msg.level;
       broadcast(room, { type: "load-level", level: msg.level }, playerId);
       return;
     }
 
-    // ── PvP toggle (host only) ────────────────────────────────
     if (msg.type === "pvp-toggle" && playerId && roomCode) {
       const room = rooms[roomCode] || persistentRooms[roomCode];
       if (!room) return;
-      if (!room.isPersistent && room.hostId !== playerId) return; // only host can toggle in regular rooms
-      if (room.isPersistent) return; // persistent rooms don't allow PvP toggle
+      if (!room.isPersistent && room.hostId !== playerId) return;
+      if (room.isPersistent) return;
       room.pvpEnabled = !!msg.enabled;
-      // Reset all player HP when enabling
       if (room.pvpEnabled) {
         Object.values(room.players).forEach((p) => { p.hp = 100; p.dead = false; });
       }
@@ -574,7 +626,6 @@ wss.on("connection", (ws) => {
       return;
     }
 
-    // ── PvP hit (attacker tells server who they hit) ──────────
     if (msg.type === "pvp-hit" && playerId && roomCode) {
       const room = rooms[roomCode] || persistentRooms[roomCode];
       if (!room) return;
@@ -583,13 +634,10 @@ wss.on("connection", (ws) => {
       if (!target || target.dead) return;
       const attacker = room.players[playerId];
       if (!attacker) return;
-      // Basic server-side sanity: attacker must be reasonably close to target
       const dist = Math.hypot((target.x + 14) - (attacker.x + 14), (target.y + 19) - (attacker.y + 19));
-      if (dist > 1200) return; // reject suspiciously long range hits
-      // Clamp damage
+      if (dist > 1200) return;
       const damage = Math.min(200, Math.max(1, Number(msg.damage) || 25));
       const knockback = Math.min(50, Math.max(0, Number(msg.knockback) || 8));
-      // Forward hit to target
       if (target.ws.readyState === WebSocket.OPEN) {
         target.ws.send(JSON.stringify({
           type: "pvp-hit",
@@ -604,7 +652,6 @@ wss.on("connection", (ws) => {
       return;
     }
 
-    // ── PvP kill notification ─────────────────────────────────
     if (msg.type === "pvp-kill" && playerId && roomCode) {
       const room = rooms[roomCode] || persistentRooms[roomCode];
       if (!room) return;
@@ -612,9 +659,7 @@ wss.on("connection", (ws) => {
       const attacker = room.players[msg.attackerId];
       const target = room.players[msg.targetId];
       if (!attacker) return;
-      // Mark target as dead on server
       if (target) { target.hp = 0; target.dead = true; }
-      // Send kill confirmation to attacker
       if (attacker.ws.readyState === WebSocket.OPEN) {
         attacker.ws.send(JSON.stringify({
           type: "pvp-kill-confirm",
@@ -623,7 +668,6 @@ wss.on("connection", (ws) => {
           weaponName: String(msg.weaponName || "Weapon").slice(0, 32)
         }));
       }
-      // Broadcast updated snapshot
       const playerList = Object.entries(room.players).map(([id, p]) => ({
         id, x: p.x, y: p.y, name: p.name, color: p.color, hp: p.hp, dead: p.dead
       }));
@@ -635,7 +679,6 @@ wss.on("connection", (ws) => {
       return;
     }
 
-    // ── PvP shot broadcast (for other clients to see) ─────────
     if (msg.type === "pvp-shot" && playerId && roomCode) {
       const room = rooms[roomCode] || persistentRooms[roomCode];
       if (!room) return;
@@ -653,13 +696,11 @@ wss.on("connection", (ws) => {
     
     delete room.players[playerId];
     
-    // Update persistent server player count
     if (room.isPersistent) {
       Server.findOneAndUpdate({ id: room.serverId }, { 
         playerCount: Object.keys(room.players).length,
         lastActivityAt: Date.now()
       }).catch(err => console.error("Error updating server:", err));
-      // Persistent rooms stay alive even with 0 players
       if (Object.keys(room.players).length > 0) {
         const playerList = Object.entries(room.players).map(([id, p]) => ({
           id, x: p.x, y: p.y, name: p.name, color: p.color, hp: p.hp, dead: p.dead
@@ -671,11 +712,9 @@ wss.on("connection", (ws) => {
         });
       }
     } else {
-      // Regular rooms delete when empty
       if (Object.keys(room.players).length === 0) {
         delete rooms[roomCode];
       } else {
-        // If host left, assign new host
         if (room.hostId === playerId) {
           const newHostId = Object.keys(room.players)[0];
           room.hostId = newHostId;

@@ -5,6 +5,25 @@
   const AUTH_KEY = "page-climber-auth";
   const ROOT = "page-climber-root";
   
+  // ── Device fingerprinting ─────────────────────────────────────
+  const getDeviceFingerprint = () => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    ctx.fillText("fingerprint", 10, 20);
+    const canvasHash = canvas.toDataURL().substring(0, 50);
+    const fp = navigator.userAgent + "|" + screen.width + "x" + screen.height + "|" + navigator.language + "|" + canvasHash;
+    // Simple hash
+    let hash = 0;
+    for (let i = 0; i < fp.length; i++) {
+      const char = fp.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return Math.abs(hash).toString(16);
+  };
+  
+  const deviceFingerprint = getDeviceFingerprint();
+  
   // ── Auth utilities ────────────────────────────────────────────
   let authToken = localStorage.getItem(AUTH_KEY);
   let currentUser = null;
@@ -14,7 +33,7 @@
       const res = await fetch(API_URL + "/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password, deviceFingerprint })
       });
       const data = await res.json();
       if (!res.ok) return { error: data.error || "Login failed" };
@@ -31,7 +50,7 @@
       const res = await fetch(API_URL + "/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password, deviceFingerprint })
       });
       const data = await res.json();
       if (!res.ok) return { error: data.error || "Registration failed" };
@@ -512,15 +531,31 @@
     const peers = Object.values(game.multiplayer.peers);
     remoteLayer.style.width = `${Math.max(innerWidth, game.customLevel?.width || document.documentElement.clientWidth)}px`;
     remoteLayer.style.height = `${getWorldHeight()}px`;
-    remoteLayer.innerHTML = peers.map((peer) => {
-      const hpPct = peer.hp !== undefined ? Math.max(0, peer.hp) : 100;
-      const hpBar = game.multiplayer.pvpEnabled ? `<div class="${ROOT}-peer-health"><div class="${ROOT}-peer-health-fill" style="width:${hpPct}%;background:${hpPct > 50 ? '#22c55e' : hpPct > 25 ? '#f59e0b' : '#ef4444'}"></div></div>` : '';
-      return `<div class="${ROOT}-remote-player" style="left:${peer.x}px;top:${peer.y}px;background:${peer.color || peerColor(peer.id)};opacity:${peer.dead ? 0.3 : 0.88}">
-        ${hpBar}
-        <div class="${ROOT}-remote-label">${peer.name || "Player"}${peer.dead ? ' 💀' : ''}</div>
-      </div>`;
-    }).join("");
-  };
+
+  remoteLayer.innerHTML = peers.map((peer) => {
+    const hpPct = peer.hp !== undefined ? Math.max(0, peer.hp) : 100;
+    const hpBar = game.multiplayer.pvpEnabled ? `...` : '';
+    
+    // Weapon indicator
+    let weaponIcon = '';
+    if (peer.weaponType && game.multiplayer.pvpEnabled) {
+      const wc = peer.weaponColor || '#60a5fa';
+      const icons = { gun: '🔫', sword: '⚔️', ability: '✨', throwable: '💣' };
+      weaponIcon = `<div style="position:absolute;top:-28px;right:-4px;font-size:12px;
+        background:rgba(15,23,42,.8);border-radius:4px;padding:1px 4px;
+        border:1px solid ${wc}">${icons[peer.weaponType] || '?'}</div>`;
+    }
+    
+    return `<div class="${ROOT}-remote-player" style="left:${peer.x}px;top:${peer.y}px;
+      background:${peer.color || peerColor(peer.id)};
+      transform:scaleX(${peer.facing || 1});
+      opacity:${peer.dead ? 0.3 : 0.88}">
+      ${hpBar}
+      ${weaponIcon}
+      <div class="${ROOT}-remote-label" style="transform:scaleX(${peer.facing || 1})">${peer.name || "Player"}${peer.dead ? ' 💀' : ''}</div>
+    </div>`;
+  }).join("");
+};
   const cleanupPeer = (id) => { delete game.multiplayer.peers[id]; renderPeers(); };
 
   // ── PvP functions ─────────────────────────────────────────────
@@ -1411,9 +1446,13 @@
       });
     });
 
-    content.querySelectorAll("[data-action='mp-create']").forEach(function(btn) { btn.addEventListener("click", function() { connectMultiplayer("create"); }); });
+    content.querySelectorAll("[data-action='mp-create']").forEach(function(btn) { btn.addEventListener("click", function() { 
+      if (!authToken || !currentUser) { say("You must be logged in to use multiplayer!"); return; }
+      connectMultiplayer("create"); 
+    }); });
     content.querySelectorAll("[data-action='mp-join']").forEach(function(btn) {
       btn.addEventListener("click", function() {
+        if (!authToken || !currentUser) { say("You must be logged in to use multiplayer!"); return; }
         var input = content.querySelector("#" + ROOT + "-room-input");
         var code = input ? input.value.toUpperCase().trim() : "";
         var statusEl = content.querySelector("#" + ROOT + "-mp-status");
@@ -1425,6 +1464,7 @@
     // Persistent servers
     content.querySelectorAll("[data-action='create-server']").forEach(function(btn) {
       btn.addEventListener("click", function() {
+        if (!authToken || !currentUser) { say("You must be logged in to create servers!"); return; }
         if (!game.customLevel) {
           say("Load a level first to create a persistent server!");
           return;
@@ -1474,6 +1514,7 @@
             }).join("");
             listEl.querySelectorAll("[data-join-server]").forEach(function(jbtn) {
               jbtn.addEventListener("click", function() {
+                if (!authToken || !currentUser) { say("You must be logged in to join servers!"); return; }
                 jbtn.textContent = "Connecting..."; jbtn.disabled = true;
                 fetch(API_URL + "/persistent-servers/" + jbtn.dataset.joinServer)
                   .then(function(r) { return r.json(); })
@@ -1557,17 +1598,26 @@
           if (!res.ok) { adminContent.textContent = "Error: " + data.error; return; }
           adminContent.innerHTML = data.users.map(function(u) {
             return '<div class="' + ROOT + '-entry" style="margin-bottom:8px"><strong>' + u.username + '</strong>' +
-              '<span class="' + ROOT + '-muted"> | ' + (u.isAdmin ? 'Admin' : 'Player') + (u.isBanned ? ' | BANNED' : '') + '</span>' +
+              '<span class="' + ROOT + '-muted"> | ' + (u.isAdmin ? 'Admin' : 'Player') + (u.isBanned ? ' | BANNED' : '') + (u.bannedDevice ? ' | DEVICE BANNED' : '') + '</span>' +
               '<div style="margin-top:6px">' +
               (u.isBanned ? '<button class="' + ROOT + '-button" data-unban-user="' + u.id + '" style="background:#84cc16">Unban</button>' : '<button class="' + ROOT + '-button" data-ban-user="' + u.id + '" style="background:#ef4444">Ban</button>') +
               '</div></div>';
           }).join("");
           adminContent.querySelectorAll("[data-ban-user]").forEach(function(bbtn) {
             bbtn.addEventListener("click", async function() {
-              if (!confirm("Ban user?")) return;
+              const banDevice = confirm("Also ban their device? (prevents logins from this device)");
               bbtn.disabled = true;
-              const bres = await fetch(API_URL + "/admin/ban/" + bbtn.dataset.banUser, { method: "POST", headers: { "Authorization": "Bearer " + authToken } });
-              if (bres.ok) { say("User banned"); content.querySelector("[data-action='view-users']").click(); } else { say("Ban failed"); }
+              const bres = await fetch(API_URL + "/admin/ban/" + bbtn.dataset.banUser, { 
+                method: "POST", 
+                headers: { "Authorization": "Bearer " + authToken, "Content-Type": "application/json" },
+                body: JSON.stringify({ banDevice })
+              });
+              if (bres.ok) { 
+                let msg = "User banned";
+                if (banDevice) msg += " (device banned)";
+                say(msg);
+                content.querySelector("[data-action='view-users']").click();
+              } else { say("Ban failed"); }
               bbtn.disabled = false;
             });
           });
@@ -1819,12 +1869,16 @@
     const now = Date.now();
     if (!force && now - game.multiplayer.lastSentAt < 80) return;
     game.multiplayer.lastSentAt = now;
-    socket.send(JSON.stringify({
-      type: "player-state",
-      x: Math.round(game.player.x), y: Math.round(game.player.y),
-      name: getUsername(), color: SKINS[state.currentSkin]?.[1] || "#4ade80",
-      hp: pvp.hp, dead: pvp.dead
-    }));
+    // Replace the socket.send(...) call inside sendMultiplayerState
+socket.send(JSON.stringify({
+  type: "player-state",
+  x: Math.round(game.player.x), y: Math.round(game.player.y),
+  name: getUsername(), color: SKINS[state.currentSkin]?.[1] || "#4ade80",
+  hp: pvp.hp, dead: pvp.dead,
+  weaponType: pvp.weapon?.type || null,
+  weaponColor: pvp.weapon?.appearance?.primaryColor || null,
+  facing: game.player.facing
+}));
   };
 
   const connectMultiplayer = (type, roomCode) => {
