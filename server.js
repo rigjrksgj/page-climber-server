@@ -525,6 +525,7 @@ const sendSnapshot = (room) => {
 wss.on("connection", (ws) => {
   let playerId = null;
   let roomCode = null;
+  let playerName = null;
 
   ws.on("message", (raw) => {
     let msg;
@@ -533,9 +534,10 @@ wss.on("connection", (ws) => {
     if (msg.type === "create") {
       roomCode = generateCode();
       playerId = randomUUID();
+      playerName = msg.name || "Player";
       rooms[roomCode] = { players: {}, currentLevel: null, pvpEnabled: false, hostId: playerId };
       rooms[roomCode].players[playerId] = {
-        ws, x: 0, y: 0, name: msg.name || "Player",
+        ws, x: 0, y: 0, name: playerName,
         color: msg.color || "#4ade80", hp: 100, dead: false
       };
       ws.send(JSON.stringify({ type: "welcome", id: playerId, room: roomCode, isHost: true }));
@@ -549,8 +551,9 @@ wss.on("connection", (ws) => {
       if (!room) { ws.send(JSON.stringify({ type: "error", message: "Room not found" })); return; }
       roomCode = code;
       playerId = randomUUID();
+      playerName = msg.name || "Player";
       room.players[playerId] = {
-        ws, x: 0, y: 0, name: msg.name || "Player",
+        ws, x: 0, y: 0, name: playerName,
         color: msg.color || "#4ade80", hp: 100, dead: false
       };
       const isPersistent = room.isPersistent || false;
@@ -684,6 +687,17 @@ wss.on("connection", (ws) => {
       if (!room) return;
       if (!room.pvpEnabled) return;
       broadcast(room, { type: "pvp-shot", shooterId: playerId, ...msg }, playerId);
+      return;
+    }
+
+    if (msg.type === "chat" && playerId && playerName) {
+      const message = String(msg.message || "").trim().slice(0, 200);
+      if (!message) return;
+      wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({ type: "chat", senderName: playerName, message }));
+        }
+      });
       return;
     }
   });

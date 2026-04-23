@@ -1,18 +1,18 @@
 (() => {
   if (window.PageClimber?.destroy) window.PageClimber.destroy();
-  const API_URL = "https://page-climber-server.onrender.com";
+  const API_URL = "https://localhost:3000";
   const KEY = "page-climber-save-v2";
   const AUTH_KEY = "page-climber-auth";
   const ROOT = "page-climber-root";
   
-  // ── Device fingerprinting ─────────────────────────────────────
+  
   const getDeviceFingerprint = () => {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     ctx.fillText("fingerprint", 10, 20);
     const canvasHash = canvas.toDataURL().substring(0, 50);
     const fp = navigator.userAgent + "|" + screen.width + "x" + screen.height + "|" + navigator.language + "|" + canvasHash;
-    // Simple hash
+    
     let hash = 0;
     for (let i = 0; i < fp.length; i++) {
       const char = fp.charCodeAt(i);
@@ -24,7 +24,7 @@
   
   const deviceFingerprint = getDeviceFingerprint();
   
-  // ── Auth utilities ────────────────────────────────────────────
+  
   let authToken = localStorage.getItem(AUTH_KEY);
   let currentUser = null;
   
@@ -73,7 +73,7 @@
     if (!authToken) return null;
     try {
     const res = await fetch(API_URL + "/verify", {
-      method: "POST",  // ADD THIS
+      method: "POST",  
       headers: { "Authorization": "Bearer " + authToken }
     });
       if (!res.ok) { authToken = null; localStorage.removeItem(AUTH_KEY); return null; }
@@ -131,9 +131,9 @@
     "secret-hover": "Hover Detective"
   };
 
-  // ── Weapon Addons ─────────────────────────────────────────────
+  
   const ADDON_TYPES = [
-    // GUNS - Optics (20 items)
+    
     { name: "Laser Sight", id: "laser_sight", stat: "accuracy", value: 5, rarity: "common", type: "gun" },
     { name: "Red Dot", id: "red_dot", stat: "accuracy", value: 8, rarity: "common", type: "gun" },
     { name: "Holographic Sight", id: "holo_sight", stat: "accuracy", value: 15, rarity: "rare", type: "gun" },
@@ -155,7 +155,7 @@
     { name: "Pixel Scope", id: "pixel_scope", stat: "accuracy", value: 25, rarity: "epic", type: "gun" },
     { name: "Quantum Sight", id: "quantum_sight", stat: "accuracy", value: 30, rarity: "epic", type: "gun" },
     
-    // GUNS - Grips & Handling (15 items)
+    
     { name: "Foregrip", id: "foregrip", stat: "recoil", value: -3, rarity: "common", type: "gun" },
     { name: "Vertical Grip", id: "vert_grip", stat: "recoil", value: -5, rarity: "uncommon", type: "gun" },
     { name: "Angled Grip", id: "angled_grip", stat: "fireRate", value: 2, rarity: "uncommon", type: "gun" },
@@ -172,7 +172,7 @@
     { name: "Pressure Pad", id: "pressure_pad", stat: "fireRate", value: 3, rarity: "uncommon", type: "gun" },
     { name: "Ergonomic Pad", id: "ergo_pad", stat: "recoil", value: -7, rarity: "rare", type: "gun" },
     
-    // GUNS - Muzzles & Barrels (20 items)
+    
     { name: "Suppressor", id: "suppressor", stat: "damage", value: -2, rarity: "rare", type: "gun" },
     { name: "Muzzle Brake", id: "muzzle_brake", stat: "recoil", value: -8, rarity: "rare", type: "gun" },
     { name: "Flash Hider", id: "flash_hider", stat: "stealth", value: 15, rarity: "uncommon", type: "gun" },
@@ -194,7 +194,7 @@
     { name: "Carbide Barrel", id: "carbide_barrel", stat: "accuracy", value: 22, rarity: "rare", type: "gun" },
     { name: "Venom Barrel", id: "venom_barrel", stat: "damage", value: 12, rarity: "rare", type: "gun" },
     
-    // GUNS - Stocks & Ammo (15 items)
+    
     { name: "Tactical Stock", id: "stock_tactical", stat: "stability", value: 15, rarity: "common", type: "gun" },
     { name: "Sniper Stock", id: "stock_sniper", stat: "stability", value: 25, rarity: "rare", type: "gun" },
     { name: "Collapsible Stock", id: "stock_collapsible", stat: "weight", value: -3, rarity: "common", type: "gun" },
@@ -211,7 +211,7 @@
     { name: "Tracer Round", id: "tracer_round", stat: "visibility", value: 40, rarity: "uncommon", type: "gun" },
     { name: "Cryo Round", id: "cryo_round", stat: "freezeEffect", value: 25, rarity: "rare", type: "gun" },
     
-    // SWORDS - Blades & Edges (15 items)
+    
     { name: "Monomolecular Edge", id: "mono_edge", stat: "bladeSharp", value: 30, rarity: "epic", type: "sword" },
     { name: "Serrated Edge", id: "serrated_edge", stat: "bleedsEffect", value: 20, rarity: "uncommon", type: "sword" },
     { name: "Curved Blade", id: "curved_blade", stat: "swingSpeed", value: 5, rarity: "uncommon", type: "sword" },
@@ -228,7 +228,7 @@
     { name: "Titanium Reinforcement", id: "titanium_reinforce", stat: "durability", value: 60, rarity: "rare", type: "sword" },
     { name: "Chaotic Blade", id: "chaotic_blade", stat: "unpredictability", value: 45, rarity: "epic", type: "sword" },
     
-    // SWORDS - Hilts & Handles (12 items)
+    
     { name: "Leather Grip", id: "leather_grip", stat: "control", value: 10, rarity: "common", type: "sword" },
     { name: "Runed Hilt", id: "runed_hilt", stat: "enchantment", value: 20, rarity: "rare", type: "sword" },
     { name: "Blessed Grip", id: "blessed_grip", stat: "holiness", value: 15, rarity: "uncommon", type: "sword" },
@@ -242,7 +242,7 @@
     { name: "Mystic Grip", id: "mystic_grip", stat: "magicPower", value: 28, rarity: "rare", type: "sword" },
     { name: "Iron Grip", id: "iron_grip", stat: "strength", value: 20, rarity: "uncommon", type: "sword" },
     
-    // ABILITIES - Mods & Enhancers (18 items)
+    
     { name: "Amplifier Core", id: "amplifier_core", stat: "damage", value: 25, rarity: "rare", type: "ability" },
     { name: "Haste Rune", id: "haste_rune", stat: "castTime", value: -0.3, rarity: "uncommon", type: "ability" },
     { name: "Extended Range Module", id: "extended_range", stat: "radius", value: 80, rarity: "rare", type: "ability" },
@@ -262,7 +262,7 @@
     { name: "Temporal Accelerant", id: "temporal_accel", stat: "speed", value: 55, rarity: "epic", type: "ability" },
     { name: "Cascade Module", id: "cascade_module", stat: "chainReaction", value: 65, rarity: "epic", type: "ability" },
     
-    // THROWABLES - Enhancements (15 items)
+    
     { name: "Fuse Reducer", id: "fuse_reducer", stat: "fuseTime", value: -0.5, rarity: "uncommon", type: "throwable" },
     { name: "Shrapnel Pack", id: "shrapnel_pack", stat: "explosionRadius", value: 100, rarity: "rare", type: "throwable" },
     { name: "Impact Detonator", id: "impact_detonator", stat: "triggerSpeed", value: -0.1, rarity: "uncommon", type: "throwable" },
@@ -334,7 +334,7 @@
   if (!state.stats.levelCompletions) state.stats.levelCompletions = 0;
   state.visitedOrigins = [...new Set([...(state.visitedOrigins || []), location.origin])];
 
-  // ── PvP state ─────────────────────────────────────────────────
+  
   const pvp = {
     enabled: false,
     hp: 100,
@@ -379,7 +379,7 @@
 
   const getUsername = () => currentUser ? currentUser.username : (state.username || "Anonymous");
 
-  // ── Styles ────────────────────────────────────────────────────
+  
   const style = document.createElement("style");
   style.id = `${ROOT}-style`;
   style.textContent = `
@@ -445,7 +445,7 @@
   `;
   document.head.appendChild(style);
 
-  // ── DOM ───────────────────────────────────────────────────────
+  
   const hud = document.createElement("div");
   hud.id = `${ROOT}-hud`;
   hud.innerHTML = `<button id="${ROOT}-toggle-hud" title="Toggle">«</button><h1>Page Climber</h1><p id="${ROOT}-username-display">Player: ${getUsername() || "not set"}</p><p id="${ROOT}-progress">Height: 0%</p><p id="${ROOT}-stats">Speed: 0 | Jump: 0</p><p id="${ROOT}-skin">Skin: ${state.currentSkin}</p><p id="${ROOT}-crate">Crates: ${state.stats.cratesOpened}</p><p id="${ROOT}-platform">Platform: none</p><p id="${ROOT}-mode">Mode: page</p><p id="${ROOT}-help">I inventory | J achievements | K skins | L levels | M multiplayer | F attack | S drop</p><div id="${ROOT}-controls"><button class="${ROOT}-button" id="${ROOT}-open-inventory">Inventory</button><button class="${ROOT}-button" id="${ROOT}-open-achievements">Achievements</button><button class="${ROOT}-button" id="${ROOT}-open-skins">Skins</button><button class="${ROOT}-button" id="${ROOT}-open-levels">Levels</button><button class="${ROOT}-button" id="${ROOT}-open-multi">Multiplayer</button><button class="${ROOT}-button" id="${ROOT}-open-profile">Account</button></div>`;
@@ -462,7 +462,7 @@
   const finish = document.createElement("div"); finish.id = `${ROOT}-finish`;
   const highlight = document.createElement("div"); highlight.id = `${ROOT}-platform-highlight`;
 
-  // PvP UI elements
+  
   const healthbarWrap = document.createElement("div"); healthbarWrap.id = `${ROOT}-healthbar-wrap`;
   healthbarWrap.innerHTML = `<div id="${ROOT}-healthbar-bg"><div id="${ROOT}-healthbar-fill" style="width:100%"></div></div><div id="${ROOT}-health-text">100 / 100</div>`;
   const weaponHud = document.createElement("div"); weaponHud.id = `${ROOT}-weapon-hud`;
@@ -471,7 +471,7 @@
   const respawnOverlay = document.createElement("div"); respawnOverlay.id = `${ROOT}-respawn-overlay`;
   respawnOverlay.innerHTML = `<div id="${ROOT}-respawn-text">YOU DIED</div><div id="${ROOT}-respawn-sub">Respawning in 3...</div>`;
 
-  // Weapon canvas for rendering weapons
+  
   const weaponCanvas = document.createElement("canvas");
   weaponCanvas.id = `${ROOT}-weapon-canvas`;
   const weaponCtx = weaponCanvas.getContext("2d");
@@ -536,7 +536,7 @@
     const hpPct = peer.hp !== undefined ? Math.max(0, peer.hp) : 100;
     const hpBar = game.multiplayer.pvpEnabled ? `...` : '';
     
-    // Weapon indicator
+    
     let weaponIcon = '';
     if (peer.weaponType && game.multiplayer.pvpEnabled) {
       const wc = peer.weaponColor || '#60a5fa';
@@ -558,7 +558,7 @@
 };
   const cleanupPeer = (id) => { delete game.multiplayer.peers[id]; renderPeers(); };
 
-  // ── PvP functions ─────────────────────────────────────────────
+  
   const updateHealthUI = () => {
     if (!game.multiplayer.pvpEnabled) { healthbarWrap.classList.remove("visible"); return; }
     healthbarWrap.classList.add("visible");
@@ -608,11 +608,11 @@
     pvp.deaths++;
     playerEl.classList.add(`${ROOT}-dead`);
     respawnOverlay.classList.add("visible");
-    // Clear projectiles we fired
+    
     pvp.projectiles.forEach(p => p.el && p.el.remove());
     pvp.projectiles = [];
     updateHealthUI();
-    // Broadcast death
+    
     sendMultiplayerState(true);
     let countdown = 3;
     const sub = document.getElementById(`${ROOT}-respawn-sub`);
@@ -631,7 +631,7 @@
     pvp.hp = pvp.maxHp;
     respawnOverlay.classList.remove("visible");
     playerEl.classList.remove(`${ROOT}-dead`);
-    // Move to spawn
+    
     const worldHeight = getWorldHeight();
     if (game.customLevel?.start) {
       game.player.x = game.customLevel.start.x;
@@ -655,7 +655,7 @@
     if (pvp.hp <= 0) {
       addKillFeedEntry(`${attackerName} killed ${getUsername()} with ${weaponName}`);
       spawnRespawn();
-      // Tell attacker they got a kill
+      
       if (game.multiplayer.socket?.readyState === WebSocket.OPEN) {
         game.multiplayer.socket.send(JSON.stringify({
           type: "pvp-kill",
@@ -666,7 +666,7 @@
     }
   };
 
-  // ── Weapon firing ─────────────────────────────────────────────
+  
   const fireWeapon = () => {
     if (!pvp.weapon || !game.multiplayer.pvpEnabled || pvp.dead) return;
     const w = pvp.weapon;
@@ -682,11 +682,11 @@
         const angle = game.player.facing > 0 ? spread : Math.PI + spread;
         const spd = w.stats.speed || 400;
         
-        // Calculate barrel position based on weapon appearance
+        
         let barrelOffsetX = 0;
-        let barrelOffsetY = 8; // Account for gun being at hip level now
+        let barrelOffsetY = 8; 
         if (w.type === 'gun' && w.appearance) {
-          // For guns, fire from barrel tip
+          
           const barrelLength = (w.appearance.barrelLength || 40);
           const bodyWidth = (w.appearance.bodyWidth || 20);
           barrelOffsetX = (bodyWidth / 2 + barrelLength) * game.player.facing;
@@ -720,7 +720,7 @@
         proj.el = el;
         pvp.projectiles.push(proj);
       }
-      // Broadcast shot
+      
       if (game.multiplayer.socket?.readyState === WebSocket.OPEN) {
         game.multiplayer.socket.send(JSON.stringify({
           type: "pvp-shot",
@@ -748,7 +748,7 @@
       arc.style.top = (game.player.y + game.player.height / 2 - arcSize / 2) + "px";
       arc.style.borderColor = w.appearance?.primaryColor || "#60a5fa";
       document.body.appendChild(arc);
-      // Check hits on peers
+      
       Object.values(game.multiplayer.peers).forEach(peer => {
         if (peer.dead) return;
         const dist = Math.hypot((peer.x + 14) - (game.player.x + 14), (peer.y + 19) - (game.player.y + 19));
@@ -828,33 +828,33 @@
     }
   };
 
-  // ── Weapon Drawing Functions ───────────────────────────────────
+  
   const drawGun = (ctx, a) => {
     const a_safe = a || {};
     const pc = a_safe.primaryColor || "#60a5fa";
     const sc = a_safe.secondaryColor || "#3b82f6";
     const ac = a_safe.accentColor || "#f59e0b";
-    const bL = a_safe.barrelLength || 60;     // Increased from 40
-    const bW = a_safe.barrelWidth || 10;      // Increased from 6
-    const bdW = a_safe.bodyWidth || 30;       // Increased from 20
-    const bdH = a_safe.bodyHeight || 18;      // Increased from 12
-    const stL = a_safe.stockLength || 40;     // Increased from 30
-    const stH = a_safe.stockHeight || 14;     // Increased from 10
-    const grH = a_safe.gripHeight || 20;      // Increased from 15
-    const grW = a_safe.gripWidth || 8;        // Increased from 6
-    const magSz = a_safe.magazineSize || 16;  // Increased from 12
+    const bL = a_safe.barrelLength || 60;     
+    const bW = a_safe.barrelWidth || 10;      
+    const bdW = a_safe.bodyWidth || 30;       
+    const bdH = a_safe.bodyHeight || 18;      
+    const stL = a_safe.stockLength || 40;     
+    const stH = a_safe.stockHeight || 14;     
+    const grH = a_safe.gripHeight || 20;      
+    const grW = a_safe.gripWidth || 8;        
+    const magSz = a_safe.magazineSize || 16;  
     const magA = a_safe.magazineAngle || 0;
     
-    // Stock
+    
     ctx.fillStyle = sc;
     ctx.fillRect(-stL - bdW / 2, -stH / 2 + 2, stL, stH);
-    // Body
+    
     ctx.fillStyle = pc;
     ctx.fillRect(-bdW / 2, -bdH / 2, bdW, bdH);
-    // Grip
+    
     ctx.fillStyle = sc;
     ctx.fillRect(-grW / 2 + 4, bdH / 2, grW, grH);
-    // Magazine
+    
     if (magSz > 4) {
       ctx.save();
       ctx.translate(4, bdH / 2);
@@ -863,13 +863,13 @@
       ctx.fillRect(-4, 0, 8, magSz * 1.2);
       ctx.restore();
     }
-    // Barrel
+    
     ctx.fillStyle = pc;
     ctx.fillRect(bdW / 2, -bW / 2, bL, bW);
     ctx.fillStyle = sc;
     ctx.fillRect(bdW / 2 + bL - 8, -bW / 2, 8, bW / 2);
     
-    // Add outline for visibility
+    
     ctx.strokeStyle = "#ffffff";
     ctx.lineWidth = 2;
     ctx.strokeRect(-stL - bdW / 2, -stH / 2 + 2, stL + bdW + bL, stH + bdH + grH);
@@ -880,31 +880,31 @@
     const pc = a_safe.primaryColor || "#cbd5e1";
     const sc = a_safe.secondaryColor || "#94a3b8";
     const ac = a_safe.accentColor || "#fbbf24";
-    const bW = a_safe.bladeWidth || 8;       // Increased from 4
+    const bW = a_safe.bladeWidth || 8;       
     const bC = a_safe.bladeCurve || 0;
-    const gW = a_safe.guardWidth || 32;      // Increased from 20
-    const gH = a_safe.guardHeight || 14;     // Increased from 10
-    const hL = a_safe.handleLength || 45;    // Increased from 30
-    const hW = a_safe.handleWidth || 6;      // Increased from 4
-    const pSz = a_safe.pommelSize || 10;     // Increased from 6
-    const bLen = (pvp.weapon?.stats?.bladeLength || 100); // Increased from 80
+    const gW = a_safe.guardWidth || 32;      
+    const gH = a_safe.guardHeight || 14;     
+    const hL = a_safe.handleLength || 45;    
+    const hW = a_safe.handleWidth || 6;      
+    const pSz = a_safe.pommelSize || 10;     
+    const bLen = (pvp.weapon?.stats?.bladeLength || 100); 
     
     ctx.save();
     ctx.rotate(-Math.PI / 4);
-    // Pommel
+    
     ctx.fillStyle = ac;
     ctx.beginPath();
     ctx.arc(0, hL / 2 + pSz / 2, pSz / 2, 0, Math.PI * 2);
     ctx.fill();
-    // Handle
+    
     for (let i = 0; i < hL; i += 6) {
       ctx.fillStyle = i % 12 === 0 ? sc : pc;
       ctx.fillRect(-hW / 2, i - hL / 2, hW, 6);
     }
-    // Guard
+    
     ctx.fillStyle = ac;
     ctx.fillRect(-gW / 2, -gH / 2, gW, gH);
-    // Blade
+    
     ctx.fillStyle = pc;
     ctx.beginPath();
     ctx.moveTo(-bW / 2, 0);
@@ -921,7 +921,7 @@
     const sc = a_safe.secondaryColor || "#7c3aed";
     const ac = a_safe.accentColor || "#60a5fa";
     const shape = a_safe.abilityShape || "circle";
-    const sz = (a_safe.abilitySize || 64) / 2;  // Doubled from 32
+    const sz = (a_safe.abilitySize || 64) / 2;  
     
     ctx.strokeStyle = pc;
     ctx.lineWidth = 4;
@@ -966,7 +966,7 @@
     const sc = a_safe.secondaryColor || "#dc2626";
     const ac = a_safe.accentColor || "#fca5a5";
     const shape = a_safe.throwableShape || "sphere";
-    const sz = a_safe.throwableSize || 28;  // Doubled from 14
+    const sz = a_safe.throwableSize || 28;  
     const s = sz / 2;
     
     if (shape === 'sphere' || !shape) {
@@ -991,7 +991,7 @@
     const w = pvp.weapon;
     ctx.save();
     ctx.translate(wx, wy);
-    // Don't scale by facing here since renderWeapon already handles it
+    
     if (w.type === 'gun') drawGun(ctx, w.appearance);
     else if (w.type === 'sword') drawSword(ctx, w.appearance);
     else if (w.type === 'ability') drawAbility(ctx, w.appearance);
@@ -1013,12 +1013,12 @@
     const py = game.player.y + game.player.height / 2;
     const facing = game.player.facing > 0 ? 1 : -1;
     
-    // Draw weapon at a larger, more visible scale
+    
     weaponCtx.globalAlpha = 0.95;
     weaponCtx.save();
     weaponCtx.translate(px + (facing * 45), py + 8);
-    weaponCtx.scale(facing, 1);  // flip if needed
-    weaponCtx.scale(1, 1);   // enlarge weapon 2.5x
+    weaponCtx.scale(facing, 1);  
+    weaponCtx.scale(1, 1);   
     drawWeapon(weaponCtx, 0, 0, 1);
     
     weaponCtx.restore();
@@ -1032,7 +1032,7 @@
       proj.traveled += Math.hypot(proj.vx * dt, proj.vy * dt);
       if (proj.el) { proj.el.style.left = proj.x + "px"; proj.el.style.top = proj.y + "px"; }
 
-      // Fuse for throwables
+      
       if (proj.isThrowable) {
         proj.fuse -= dt * 1000;
         if (proj.fuse <= 0) {
@@ -1041,7 +1041,7 @@
         }
       }
 
-      // Hit peers
+      
       let hitSomeone = false;
       Object.values(game.multiplayer.peers).forEach(peer => {
         if (peer.dead || hitSomeone) return;
@@ -1092,7 +1092,7 @@
     });
   };
 
-  // ── Panel HTML ────────────────────────────────────────────────
+  
   const panelHtml = {
     inventory() {
       const items = Object.entries(state.inventory).sort((a, b) => b[1] - a[1]);
@@ -1102,7 +1102,7 @@
       
       let html = `<h2>Inventory</h2>`;
       
-      // Weapons section
+      
       html += `<div class="${ROOT}-entry"><strong>⚔ Weapons (${weapons.length})</strong>`;
       if (weapons.length) {
         html += weapons.map((wpn, i) => `<div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center"><span class="${ROOT}-muted"><strong>${wpn.name}</strong><br><span style="font-size:10px">${wpn.type}</span></span><div style="display:flex;gap:4px"><button class="${ROOT}-button" data-load-weapon="${i}" style="padding:4px 8px;font-size:9px">LOAD</button><button class="${ROOT}-button" data-delete-weapon="${i}" style="padding:4px 8px;font-size:9px">DELETE</button></div></div>`).join("");
@@ -1111,7 +1111,7 @@
       }
       html += `</div>`;
       
-      // Lootboxes section
+      
       html += `<div class="${ROOT}-entry"><strong>🎁 Lootboxes (${lootboxes.length})</strong>`;
       if (lootboxes.length) {
         html += lootboxes.map((lb, i) => `<div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center"><span class="${ROOT}-muted">${lb.type.toUpperCase()}</span><button class="${ROOT}-button" data-open-lootbox="${lb.id}" style="padding:4px 8px;font-size:9px">OPEN</button></div>`).join("");
@@ -1120,7 +1120,7 @@
       }
       html += `</div>`;
       
-      // Addons section
+      
       html += `<div class="${ROOT}-entry"><strong>🔧 Weapon Addons (${addons.length})</strong>`;
       if (addons.length) {
         html += addons.map((addon, i) => `<div style="margin-top:6px;display:flex;justify-content:space-between;align-items:center;padding:6px;background:rgba(96,165,250,0.1);border-radius:6px"><span class="${ROOT}-muted"><strong>${addon.name}</strong><br><span style="font-size:10px">${addon.stat} +${addon.value}</span></span><button class="${ROOT}-button" data-delete-addon="${addon.id}" style="padding:4px 8px;font-size:9px">DELETE</button></div>`).join("");
@@ -1129,7 +1129,7 @@
       }
       html += `</div>`;
       
-      // Regular items section
+      
       html += `<div class="${ROOT}-entry"><strong>Items (${items.length})</strong>`;
       if (items.length) {
         html += items.map(([id, count]) => {
@@ -1252,6 +1252,9 @@
         '<button class="' + ROOT + '-button" data-close="1">Close</button>'
       );
     },
+    chat() {
+      return `<h2>Global Chat</h2><div id="${ROOT}-chat-messages" style="height:300px;overflow-y:auto;border:1px solid rgba(96,165,250,.5);padding:8px;margin-bottom:8px;background:rgba(30,41,59,.9);font-family:monospace;font-size:12px"></div><input id="${ROOT}-chat-input" class="${ROOT}-input" placeholder="Type message..." maxlength="200" style="width:100%;margin-bottom:8px"><button class="${ROOT}-button" data-action="send-chat">Send</button><button class="${ROOT}-button" data-close="1">Close</button>`;
+    },
     admin() {
       return (
         '<h2>Admin Panel</h2>' +
@@ -1265,7 +1268,7 @@
     }
   };
 
-  // ── openPanel ─────────────────────────────────────────────────
+  
   const openPanel = (tab) => {
     if (tab === undefined) tab = "inventory";
     state.panelTab = tab;
@@ -1277,14 +1280,14 @@
     content.querySelectorAll("[data-action='clear-level']").forEach(function(btn) { btn.addEventListener("click", function() { clearLevel(); }); });
     content.querySelectorAll("[data-close]").forEach(function(btn) { btn.addEventListener("click", function() { panel.classList.remove(ROOT + "-open"); }); });
 
-    // Lootbox opening
+    
     content.querySelectorAll("[data-open-lootbox]").forEach(function(btn) {
       btn.addEventListener("click", function() {
         openLootbox(btn.dataset.openLootbox);
       });
     });
 
-    // Addon deletion
+    
     content.querySelectorAll("[data-delete-addon]").forEach(function(btn) {
       btn.addEventListener("click", function() {
         const addonId = btn.dataset.deleteAddon;
@@ -1298,7 +1301,7 @@
       });
     });
 
-    // Weapon loading
+    
     content.querySelectorAll("[data-load-weapon]").forEach(function(btn) {
       btn.addEventListener("click", function() {
         const idx = parseInt(btn.dataset.loadWeapon);
@@ -1312,7 +1315,7 @@
       });
     });
 
-    // Weapon deletion
+    
     content.querySelectorAll("[data-delete-weapon]").forEach(function(btn) {
       btn.addEventListener("click", function() {
         const idx = parseInt(btn.dataset.deleteWeapon);
@@ -1341,7 +1344,7 @@
       });
     });
 
-    // PvP toggles
+    
     content.querySelectorAll("[data-action='pvp-on']").forEach(function(btn) {
       btn.addEventListener("click", function() {
         if (!game.multiplayer.isHost) return;
@@ -1359,7 +1362,33 @@
       });
     });
 
-    // Load weapon
+    
+    content.querySelectorAll("[data-action='send-chat']").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        const input = content.querySelector("#" + ROOT + "-chat-input");
+        const message = input.value.trim();
+        if (message && game.multiplayer.socket?.readyState === WebSocket.OPEN) {
+          game.multiplayer.socket.send(JSON.stringify({ type: "chat", message }));
+          input.value = "";
+        }
+      });
+    });
+
+    const chatInput = content.querySelector("#" + ROOT + "-chat-input");
+    if (chatInput) {
+      chatInput.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const message = chatInput.value.trim();
+          if (message && game.multiplayer.socket?.readyState === WebSocket.OPEN) {
+            game.multiplayer.socket.send(JSON.stringify({ type: "chat", message }));
+            chatInput.value = "";
+          }
+        }
+      });
+    }
+
+    
     content.querySelectorAll("[data-action='load-weapon']").forEach(function(btn) {
       btn.addEventListener("click", function() {
         var input = document.createElement("input");
@@ -1461,7 +1490,7 @@
       });
     });
 
-    // Persistent servers
+    
     content.querySelectorAll("[data-action='create-server']").forEach(function(btn) {
       btn.addEventListener("click", function() {
         if (!authToken || !currentUser) { say("You must be logged in to create servers!"); return; }
@@ -1532,7 +1561,7 @@
     });
     content.querySelectorAll("[data-action='mp-leave']").forEach(function(btn) { btn.addEventListener("click", function() { disconnectMultiplayer(); openPanel("multi"); }); });
 
-    // Auth listeners
+    
     content.querySelectorAll("[data-action='login']").forEach(function(btn) {
       btn.addEventListener("click", async function() {
         const username = content.querySelector("#" + ROOT + "-username-input")?.value || "";
@@ -1561,7 +1590,7 @@
       btn.addEventListener("click", function() { openPanel("admin"); });
     });
 
-    // Admin panel listeners
+    
     content.querySelectorAll("[data-action='view-servers']").forEach(function(btn) {
       btn.addEventListener("click", async function() {
         const adminContent = content.querySelector("#" + ROOT + "-admin-content");
@@ -1671,7 +1700,7 @@
     }).catch(function() {});
   };
 
-  // ── Game functions ────────────────────────────────────────────
+  
   const unlock = (id) => {
     if (state.achievements[id]) return;
     state.achievements[id] = { id, label: ACH[id] || id, unlockedAt: Date.now() };
@@ -1788,7 +1817,7 @@
     scanPlatforms(true); renderLevelGeometry(); standOnPlatform(findSpawnPlatform()); spawnCrates(); render();
     say(`Level loaded: ${level.name}`);
     if (panel.classList.contains(`${ROOT}-open`)) openPanel("levels");
-    // Sync level to multiplayer room
+    
     if (game.multiplayer.socket?.readyState === WebSocket.OPEN) {
       game.multiplayer.socket.send(JSON.stringify({ type: "load-level", level }));
     }
@@ -1809,7 +1838,7 @@
     input.click();
   };
 
-  // ── Multiplayer ───────────────────────────────────────────────
+  
   const handleMultiplayerMessage = (message) => {
     if (message.type === "welcome") {
       game.multiplayer.playerId = message.id;
@@ -1861,6 +1890,18 @@
       say(`You killed ${message.targetName}!`);
       return;
     }
+
+    if (message.type === "chat") {
+      const chatDiv = document.querySelector("#" + ROOT + "-chat-messages");
+      if (chatDiv) {
+        const p = document.createElement("p");
+        p.style.margin = "2px 0";
+        p.innerHTML = `<strong>${message.senderName}:</strong> ${message.message}`;
+        chatDiv.appendChild(p);
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+      }
+      return;
+    }
   };
 
   const sendMultiplayerState = (force = false) => {
@@ -1869,7 +1910,7 @@
     const now = Date.now();
     if (!force && now - game.multiplayer.lastSentAt < 80) return;
     game.multiplayer.lastSentAt = now;
-    // Replace the socket.send(...) call inside sendMultiplayerState
+    
 socket.send(JSON.stringify({
   type: "player-state",
   x: Math.round(game.player.x), y: Math.round(game.player.y),
@@ -1883,7 +1924,7 @@ socket.send(JSON.stringify({
 
   const connectMultiplayer = (type, roomCode) => {
     disconnectMultiplayer();
-    const wsUrl = API_URL.replace("https://", "wss://").replace("http://", "ws://");
+    const wsUrl = API_URL.replace("https:", "wss:");
     const socket = new WebSocket(wsUrl);
     game.multiplayer.socket = socket;
     socket.addEventListener("open", function() {
@@ -1920,7 +1961,7 @@ socket.send(JSON.stringify({
     if (crate.opened) return;
     crate.opened = true; crate.el.remove(); state.stats.cratesOpened += 1;
     
-    // Add lootbox to inventory instead of opening immediately
+    
     const lootbox = {
       id: Math.random().toString(36).slice(2),
       type: Math.random() > 0.85 ? "epic" : Math.random() > 0.6 ? "rare" : "standard",
@@ -1939,15 +1980,15 @@ socket.send(JSON.stringify({
     const lootbox = state.lootboxes[idx];
     const rewardCount = lootbox.type === "standard" ? 1 : lootbox.type === "rare" ? 2 : 3;
     
-    // Generate final rewards with weighted rarity
+    
     const finalRewards = [];
     for (let i = 0; i < rewardCount; i++) {
       finalRewards.push(getRandomAddon());
     }
     
-    // Show CS-GO style opening animation
+    
     showLootboxOpening(lootboxId, finalRewards, () => {
-      // Remove lootbox and add rewards
+      
       state.lootboxes.splice(idx, 1);
       
       const rewardNames = [];
@@ -1967,10 +2008,10 @@ socket.send(JSON.stringify({
   };
 
   const showLootboxOpening = (lootboxId, finalRewards, onComplete) => {
-    // Close current panel
+    
     panel.classList.remove(`${ROOT}-open`);
     
-    // Create modal overlay
+    
     const modal = document.createElement("div");
     modal.style.cssText = `
       position: fixed; inset: 0; z-index: 9999; background: rgba(0, 0, 0, 0.95);
@@ -1978,7 +2019,7 @@ socket.send(JSON.stringify({
       font-family: ui-monospace, monospace; color: #f8fafc;
     `;
     
-    // Title
+    
     const title = document.createElement("div");
     title.style.cssText = `
       font-size: 24px; font-weight: bold; margin-bottom: 40px;
@@ -1988,7 +2029,7 @@ socket.send(JSON.stringify({
     title.textContent = "Opening Lootbox...";
     modal.appendChild(title);
     
-    // Generate many addon options for scrolling (includes final rewards)
+    
     const rarityColors = {
       "common": "#94a3b8",
       "uncommon": "#4ade80",
@@ -1996,17 +2037,17 @@ socket.send(JSON.stringify({
       "epic": "#f59e0b"
     };
     
-    // Create scrollable items - lots of random addons + final rewards
+    
     const scrollItems = [];
     for (let i = 0; i < 25; i++) {
       scrollItems.push(getRandomAddon());
     }
-    // Insert final rewards at the end
+    
     for (const reward of finalRewards) {
       scrollItems.push(reward);
     }
     
-    // Container for the scrolling animation
+    
     const wheelContainer = document.createElement("div");
     wheelContainer.style.cssText = `
       position: relative; width: 500px; height: 150px;
@@ -2019,14 +2060,14 @@ socket.send(JSON.stringify({
       align-items: center;
     `;
     
-    // Scrolling track
+    
     const track = document.createElement("div");
     track.style.cssText = `
       display: flex; gap: 12px; padding: 12px;
       animation: scroll-items 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
     `;
     
-    // Create item elements
+    
     scrollItems.forEach((addon, idx) => {
       const item = document.createElement("div");
       const isReward = idx >= scrollItems.length - finalRewards.length;
@@ -2049,7 +2090,7 @@ socket.send(JSON.stringify({
         transition: all 0.3s;
       `;
       
-      // Addon name
+      
       const name = document.createElement("div");
       name.style.cssText = `
         font-weight: bold;
@@ -2062,7 +2103,7 @@ socket.send(JSON.stringify({
       name.textContent = addon.name;
       item.appendChild(name);
       
-      // Rarity badge
+      
       const rarity = document.createElement("div");
       rarity.style.cssText = `
         font-size: 9px;
@@ -2076,7 +2117,7 @@ socket.send(JSON.stringify({
       rarity.textContent = addon.rarity;
       item.appendChild(rarity);
       
-      // Stat info
+      
       const stat = document.createElement("div");
       stat.style.cssText = `
         font-size: 8px;
@@ -2091,7 +2132,7 @@ socket.send(JSON.stringify({
     
     wheelContainer.appendChild(track);
     
-    // Glow effect in center
+    
     const centerGlow = document.createElement("div");
     centerGlow.style.cssText = `
       position: absolute; left: 50%; top: 50%;
@@ -2106,7 +2147,7 @@ socket.send(JSON.stringify({
     
     modal.appendChild(wheelContainer);
     
-    // Add CSS animations
+    
     if (!document.getElementById(`${ROOT}-csgo-lootbox-style`)) {
       const style = document.createElement("style");
       style.id = `${ROOT}-csgo-lootbox-style`;
@@ -2130,7 +2171,7 @@ socket.send(JSON.stringify({
       document.head.appendChild(style);
     }
     
-    // Add result text
+    
     const resultText = document.createElement("div");
     resultText.style.cssText = `
       margin-top: 40px;
@@ -2145,7 +2186,7 @@ socket.send(JSON.stringify({
     resultText.innerHTML = `Got: ${rewardDescriptions}`;
     modal.appendChild(resultText);
     
-    // Add fade-in animation for result
+    
     if (!document.getElementById(`${ROOT}-result-style`)) {
       const style = document.createElement("style");
       style.id = `${ROOT}-result-style`;
@@ -2160,7 +2201,7 @@ socket.send(JSON.stringify({
     
     document.body.appendChild(modal);
     
-    // Close modal and complete after animation
+    
     setTimeout(() => {
       modal.remove();
       onComplete();
@@ -2322,7 +2363,7 @@ socket.send(JSON.stringify({
   };
 
   const onKeyDown = (event) => {
-    // Don't trigger game actions while typing in input fields
+    
     const activeElement = document.activeElement;
     if (activeElement.tagName === "INPUT" || activeElement.tagName === "TEXTAREA") return;
     
@@ -2338,6 +2379,7 @@ socket.send(JSON.stringify({
     if (key === "k") { openPanel("skins"); event.preventDefault(); }
     if (key === "l") { openPanel("levels"); event.preventDefault(); }
     if (key === "m") { openPanel("multi"); event.preventDefault(); }
+    if (key === "c") { openPanel("chat"); event.preventDefault(); }
     const combo = (window.__pcSecret = [...(window.__pcSecret || []), event.key].slice(-14)).join(",");
     if (combo.includes("ArrowUp,ArrowUp,ArrowDown,ArrowDown,ArrowLeft,ArrowRight,ArrowLeft,ArrowRight,b,a")) unlock("konami");
     if (combo.toLowerCase().includes("h,o,v,e,r")) unlock("secret-hover");
@@ -2361,24 +2403,24 @@ socket.send(JSON.stringify({
   hud.querySelector(`#${ROOT}-open-profile`).addEventListener("click", () => openPanel("account"));
   panel.querySelectorAll("[data-tab]").forEach((btn) => btn.addEventListener("click", () => openPanel(btn.dataset.tab)));
 
-  // Verify auth on load
+  
   verifyAuth().then(user => {
   if (user) {
-    // Sync the local state username with the logged-in account
+    
     state.username = user.username;
     save();
     say("Welcome back, " + user.username + "!");
     const usernameDisplay = hud.querySelector("#" + ROOT + "-username-display");
     if (usernameDisplay) usernameDisplay.textContent = "Player: " + user.username;
-    // Submit leaderboard with current completions under their account
+    
     submitLeaderboard(user.username, state.stats.levelCompletions);
   } else {
-    // Token was invalid/expired — clear it silently
+    
     localStorage.removeItem(AUTH_KEY);
   }
 });
 
-  // Periodic ban check - verify user isn't banned every 10 seconds
+  
   setInterval(async () => {
     if (!authToken || !currentUser) return;
     try {
@@ -2387,9 +2429,9 @@ socket.send(JSON.stringify({
         headers: { "Authorization": "Bearer " + authToken }
       });
       if (res.status === 403) {
-        // User was banned!
+        
         say("You have been banned from the server.");
-        // Close websocket if connected
+        
         if (window.PageClimber?.ws) {
           try { window.PageClimber.ws.close(); } catch {}
         }
@@ -2442,7 +2484,7 @@ socket.send(JSON.stringify({
   game.player.y = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, innerHeight) - game.player.height - 24;
   state.stats.runs += 1; save();
   scanPlatforms(true); renderLevelGeometry(); standOnPlatform(findSpawnPlatform()); spawnCrates(); render();
-  say("Page Climber started. I inventory, J achievements, K skins, L levels, M multiplayer, F attack.");
+  say("Page Climber started. I inventory, J achievements, K skins, L levels, M multiplayer, C chat, F attack.");
   requestAnimationFrame(loop);
 
   const saveWeapon = (wpn) => {
