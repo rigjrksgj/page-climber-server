@@ -15,8 +15,8 @@ const wss = new WebSocketServer({ noServer: true });
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "change-me-in-production";
 const ADMIN_USERNAME = (process.env.ADMIN_USERNAME || "").toLowerCase();
-const MONGODB_URI = process.env.MONGODB_URI || "";
-const PORT = process.env.PORT || 3000;
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/pageclimber";
+const PORT = process.env.PORT || 10000;
 
 if (!MONGODB_URI) {
   console.error("ERROR: MONGODB_URI environment variable is not set. Please set it before starting the server.");

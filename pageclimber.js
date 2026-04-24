@@ -1,10 +1,10 @@
 (() => {
   if (window.PageClimber?.destroy) window.PageClimber.destroy();
-  const API_URL = "https://localhost:3000";
+  const API_URL = "https://page-climber-server.onrender.com";
   const KEY = "page-climber-save-v2";
   const AUTH_KEY = "page-climber-auth";
   const ROOT = "page-climber-root";
-  
+  const chatHistory = [];
   
   const getDeviceFingerprint = () => {
     const canvas = document.createElement("canvas");
@@ -382,8 +382,11 @@
   
   const style = document.createElement("style");
   style.id = `${ROOT}-style`;
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.innerHTML = `<defs><filter id="${ROOT}-wavy"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" result="noise" seed="2"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" xChannelSelector="R" yChannelSelector="G"/></filter><filter id="${ROOT}-sketchy"><feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5"/></filter></defs>`;
+  document.body.appendChild(svg);
   style.textContent = `
-    #${ROOT}-hud,#${ROOT}-panel{position:fixed;z-index:2147483646;color:#f8fafc;font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:rgba(15,23,42,.88);border:1px solid rgba(148,163,184,.35);border-radius:14px;box-shadow:0 14px 40px rgba(15,23,42,.35);backdrop-filter:blur(10px)}
+    #${ROOT}-hud,#${ROOT}-panel{position:fixed;z-index:2147483646;color:#2d1f0f;font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:rgba(235,220,200,.95);border:3px solid #8b6f47;border-radius:8px;box-shadow:0 14px 40px rgba(15,23,42,.25),inset 0 1px 0 rgba(255,255,255,.3);backdrop-filter:blur(5px);filter:url(#${ROOT}-wavy)}
     #${ROOT}-hud{left:16px;top:16px;width:340px;padding:12px;transition:width .3s ease,padding .3s ease}
     #${ROOT}-hud.${ROOT}-collapsed{width:36px;padding:8px;overflow:hidden}
     #${ROOT}-hud.${ROOT}-collapsed #${ROOT}-controls,#${ROOT}-hud.${ROOT}-collapsed p,#${ROOT}-hud.${ROOT}-collapsed h1{opacity:0;pointer-events:none;margin:0;height:0;overflow:hidden;transition:opacity .2s ease}
@@ -391,19 +394,21 @@
     #${ROOT}-toggle-hud{position:absolute;top:8px;right:8px;width:20px;height:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:14px;line-height:1;background:none;border:none;padding:0;font-family:inherit;z-index:1}
     #${ROOT}-hud h1,#${ROOT}-panel h2{margin:0 0 8px;font-size:14px} #${ROOT}-hud p{margin:4px 0}
     #${ROOT}-controls,.${ROOT}-tabs{display:flex;gap:8px;flex-wrap:wrap} #${ROOT}-controls{margin-top:8px}
-    .${ROOT}-button{border:1px solid rgba(96,165,250,.5);background:rgba(30,41,59,.9);color:#fff;border-radius:999px;padding:6px 10px;cursor:pointer;font:inherit}
+    .${ROOT}-button{border:2px solid #8b6f47;background:linear-gradient(135deg,#d4a574,#b8924a);color:#2d1f0f;border-radius:6px;padding:6px 10px;cursor:pointer;font:inherit;font-weight:bold;box-shadow:0 4px 8px rgba(0,0,0,.15);transition:all .1s ease)}
+    .${ROOT}-button:hover{background:linear-gradient(135deg,#e0b580,#c4a057);transform:translateY(-2px);box-shadow:0 6px 12px rgba(0,0,0,.2)}
+    .${ROOT}-button:active{transform:translateY(0);box-shadow:0 2px 4px rgba(0,0,0,.1)}
     .${ROOT}-button[disabled]{opacity:.45;cursor:not-allowed}
     #${ROOT}-panel{right:16px;top:16px;width:360px;max-height:min(72vh,720px);padding:12px;overflow:auto;display:none}
     #${ROOT}-panel.${ROOT}-open{display:block}
-    .${ROOT}-entry{padding:8px 10px;border-radius:10px;margin-bottom:8px;background:rgba(30,41,59,.75);border:1px solid rgba(148,163,184,.2)}
-    .${ROOT}-entry strong{display:block}.${ROOT}-muted{color:#cbd5e1}
+    .${ROOT}-entry{padding:8px 10px;border-radius:6px;margin-bottom:8px;background:rgba(255,245,230,.5);border:2px solid #c4a582;filter:url(#${ROOT}-wavy)}
+    .${ROOT}-entry strong{display:block}.${ROOT}-muted{color:#64748b}
     #${ROOT}-toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:2147483647;pointer-events:none}
-    .${ROOT}-toast-card{margin-top:8px;padding:10px 14px;border-radius:999px;background:rgba(15,23,42,.92);color:#fff;font:12px/1.2 ui-monospace,monospace;border:1px solid rgba(96,165,250,.5);box-shadow:0 10px 25px rgba(15,23,42,.2);animation:${ROOT}-fade 2.8s ease forwards}
+    .${ROOT}-toast-card{margin-top:8px;padding:10px 14px;border-radius:6px;background:rgba(235,220,200,.95);color:#2d1f0f;font:12px/1.2 ui-monospace,monospace;border:2px solid #8b6f47;box-shadow:0 10px 25px rgba(15,23,42,.2);animation:${ROOT}-fade 2.8s ease forwards;filter:url(#${ROOT}-wavy)}
     @keyframes ${ROOT}-fade{0%{opacity:0;transform:translateY(-8px)}12%{opacity:1;transform:translateY(0)}88%{opacity:1}100%{opacity:0;transform:translateY(-8px)}}
-    #${ROOT}-player{position:absolute;width:28px;height:38px;z-index:2147483645;border-radius:12px 12px 6px 6px;border:2px solid rgba(255,255,255,.9);box-shadow:0 0 0 2px rgba(15,23,42,.4),0 12px 25px rgba(15,23,42,.35);pointer-events:none;transform-origin:center bottom}
-    #${ROOT}-player::before,#${ROOT}-player::after{content:"";position:absolute;background:#fff}
-    #${ROOT}-player::before{width:7px;height:7px;left:5px;top:8px;border-radius:50%;box-shadow:10px 0 0 #fff}
-    #${ROOT}-player::after{left:6px;right:6px;height:3px;bottom:7px;border-radius:999px}
+    #${ROOT}-player{position:absolute;width:28px;height:38px;z-index:2147483645;pointer-events:none;transform-origin:center bottom;background:linear-gradient(135deg,#e8a87c,#d4946f);border:2px solid #3d2817;border-radius:10px 10px 5px 5px;box-shadow:0 4px 12px rgba(0,0,0,.3),inset -1px -1px 3px rgba(0,0,0,.15);filter:url(#${ROOT}-sketchy)}
+    #${ROOT}-player::before,#${ROOT}-player::after{content:"";position:absolute;background:#3d2817;border-radius:50%}
+    #${ROOT}-player::before{width:6px;height:6px;left:6px;top:10px;box-shadow:12px 0 0 #3d2817}
+    #${ROOT}-player::after{left:8px;width:4px;height:2px;bottom:9px;border-radius:999px}
     #${ROOT}-player.${ROOT}-run{animation:${ROOT}-run .34s linear infinite}
     #${ROOT}-player.${ROOT}-jump{transform:scaleY(1.08) scaleX(.95)}
     #${ROOT}-player.${ROOT}-dead{opacity:.3;filter:grayscale(1)}
@@ -414,11 +419,11 @@
     .${ROOT}-level-platform{position:absolute;background:rgba(96,165,250,.24);border:2px solid rgba(96,165,250,.95);border-radius:8px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
     #${ROOT}-platform-highlight{position:absolute;z-index:2147483643;pointer-events:none;border:2px solid rgba(34,197,94,.95);background:rgba(34,197,94,.12);box-shadow:0 0 0 2px rgba(255,255,255,.14) inset;border-radius:8px;display:none}
     #${ROOT}-remote-layer{position:absolute;left:0;top:0;z-index:2147483644;pointer-events:none}
-    .${ROOT}-remote-player{position:absolute;width:28px;height:38px;border-radius:12px 12px 6px 6px;border:2px solid rgba(255,255,255,.9);box-shadow:0 0 0 2px rgba(15,23,42,.4),0 12px 25px rgba(15,23,42,.2);opacity:.88}
+    .${ROOT}-remote-player{position:absolute;width:28px;height:38px;border-radius:10px 10px 5px 5px;border:2px solid #5d4e37;background:linear-gradient(135deg,#d9a584,#c09470);box-shadow:0 4px 10px rgba(0,0,0,.25);opacity:.9;filter:url(#${ROOT}-sketchy)}
     .${ROOT}-remote-player::before{content:"";position:absolute;left:5px;top:8px;width:7px;height:7px;border-radius:50%;background:#fff;box-shadow:10px 0 0 #fff}
     .${ROOT}-remote-label{position:absolute;top:-18px;left:50%;transform:translateX(-50%);padding:2px 6px;border-radius:999px;background:rgba(15,23,42,.9);color:#fff;font:10px/1.2 ui-monospace,monospace;white-space:nowrap}
-    .${ROOT}-crate{position:absolute;width:20px;height:20px;z-index:2147483644;background:linear-gradient(135deg,#f59e0b,#ef4444);border:2px solid rgba(255,255,255,.88);border-radius:6px;box-shadow:0 12px 24px rgba(0,0,0,.22)}
-    .${ROOT}-crate::after{content:"?";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font:700 12px/1 ui-monospace,monospace}
+    .${ROOT}-crate{position:absolute;width:20px;height:20px;z-index:2147483644;background:linear-gradient(135deg,#f4a460,#dc8a4f);border:2px solid #5d4e37;border-radius:2px;box-shadow:0 4px 12px rgba(0,0,0,.3),inset 1px 1px 0 rgba(255,255,255,.2);filter:url(#${ROOT}-sketchy)}
+    .${ROOT}-crate::after{content:"?";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font:700 14px/1 ui-monospace,monospace;text-shadow:1px 1px 2px rgba(0,0,0,.5)}
     .${ROOT}-link-hit{outline:2px solid rgba(96,165,250,.9);outline-offset:2px}
     .${ROOT}-input{flex:1;min-width:120px;padding:6px 10px;border-radius:999px;border:1px solid rgba(96,165,250,.5);background:rgba(30,41,59,.9);color:#fff;font:inherit;outline:none}
     #${ROOT}-healthbar-wrap{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:2147483646;display:none;flex-direction:column;align-items:center;gap:4px;pointer-events:none}
@@ -1208,10 +1213,11 @@
         '<h2>Multiplayer</h2>' +
         (connected ?
           '<div class="' + ROOT + '-entry"><strong>Connected' + (pvpOn ? '<span class="' + ROOT + '-pvp-badge">PvP ON</span>' : '') + (isPersistent ? '<span class="' + ROOT + '-pvp-badge" style="background:#8b5cf6">PERSISTENT</span>' : '') + '</strong>' +
-          '<span class="' + ROOT + '-muted">Room code: <strong style="color:#fff;font-size:18px;letter-spacing:4px">' + code + '</strong></span>' +
+          '<span class="' + ROOT + '-muted">Room code: <strong style="color:#000;font-size:18px;letter-spacing:4px">' + code + '</strong></span>' +
           '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">' +
           (!isPersistent && isHost ? '<button class="' + ROOT + '-button" data-action="' + (pvpOn ? 'pvp-off' : 'pvp-on') + '">' + (pvpOn ? '⚔ Disable PvP' : '⚔ Enable PvP') + '</button>' : '') +
           '<button class="' + ROOT + '-button" data-action="mp-leave">Leave room</button>' +
+          '<button class="' + ROOT + '-button" data-action="open-chat">💬 Global Chat</button>' +
           '</div></div>' +
           '<div class="' + ROOT + '-entry"><strong>Weapon</strong>' +
           '<span class="' + ROOT + '-muted">Equipped: ' + weaponName + '</span>' +
@@ -1222,7 +1228,8 @@
           '<div style="margin-top:8px;display:flex;gap:8px">' +
           '<button class="' + ROOT + '-button" data-action="mp-create">Create Room</button>' +
           '<input id="' + ROOT + '-room-input" placeholder="XKQZ" maxlength="4" style="width:80px;padding:6px 10px;border-radius:999px;border:1px solid rgba(96,165,250,.5);background:rgba(30,41,59,.9);color:#fff;font:inherit;outline:none;text-transform:uppercase">' +
-          '<button class="' + ROOT + '-button" data-action="mp-join">Join</button></div>' +
+          '<button class="' + ROOT + '-button" data-action="mp-join">Join</button>' +
+          '<button class="' + ROOT + '-button" data-action="open-chat">💬 Chat</button></div>' +
           '<span id="' + ROOT + '-mp-status" class="' + ROOT + '-muted" style="display:block;margin-top:6px"></span></div>' +
           '<div class="' + ROOT + '-entry"><strong>Persistent Servers</strong>' +
           '<div style="margin-top:8px"><button class="' + ROOT + '-button" data-action="create-server">Create Server</button> <button class="' + ROOT + '-button" data-action="list-servers">Browse Servers</button></div></div>' +
@@ -1243,7 +1250,7 @@
         :
           '<div class="' + ROOT + '-entry"><strong>Login or Register</strong>' +
           '<div style="margin-top:8px">' +
-          '<input id="' + ROOT + '-username-input" placeholder="Username" maxlength="32" style="width:100%;padding:8px;border-radius:4px;border:1px solid rgba(96,165,250,.5);background:rgba(30,41,59,.9);color:#fff;font:inherit;outline:none;margin-bottom:6px">' +
+          '<input id="' + ROOT + '-username-input" placeholder="Username" maxlength="32" style="width:100%;padding:8px;border-radius:4px;border:1px solid rgba(96,165,250,.5);background:rgba(235, 220, 200, .95);color:#fff;font:inherit;outline:none;margin-bottom:6px">' +
           '<input id="' + ROOT + '-password-input" type="password" placeholder="Password" maxlength="64" style="width:100%;padding:8px;border-radius:4px;border:1px solid rgba(96,165,250,.5);background:rgba(30,41,59,.9);color:#fff;font:inherit;outline:none;margin-bottom:6px">' +
           '<button class="' + ROOT + '-button" data-action="login" style="width:100%">Login</button>' +
           '<button class="' + ROOT + '-button" data-action="register" style="width:100%;margin-top:6px">Create Account</button>' +
@@ -1253,7 +1260,7 @@
       );
     },
     chat() {
-      return `<h2>Global Chat</h2><div id="${ROOT}-chat-messages" style="height:300px;overflow-y:auto;border:1px solid rgba(96,165,250,.5);padding:8px;margin-bottom:8px;background:rgba(30,41,59,.9);font-family:monospace;font-size:12px"></div><input id="${ROOT}-chat-input" class="${ROOT}-input" placeholder="Type message..." maxlength="200" style="width:100%;margin-bottom:8px"><button class="${ROOT}-button" data-action="send-chat">Send</button><button class="${ROOT}-button" data-close="1">Close</button>`;
+      return `<h2>Global Chat</h2><div id="${ROOT}-chat-messages" style="height:300px;overflow-y:auto;border:1px solid rgba(96,165,250,.5);padding:8px;margin-bottom:8px;background:rgba(175, 143, 74, 0.9);font-family:monospace;font-size:12px"></div><input id="${ROOT}-chat-input" class="${ROOT}-input" placeholder="Type message..." maxlength="200" style="width:100%;margin-bottom:8px"><button class="${ROOT}-button" data-action="send-chat">Send</button><button class="${ROOT}-button" data-close="1">Close</button>`;
     },
     admin() {
       return (
@@ -1269,12 +1276,24 @@
   };
 
   
-  const openPanel = (tab) => {
+const openPanel = (tab) => {
     if (tab === undefined) tab = "inventory";
     state.panelTab = tab;
     panel.classList.add(ROOT + "-open");
     const content = panel.querySelector("#" + ROOT + "-panel-content");
     content.innerHTML = panelHtml[tab]();
+    if (tab === "chat") {
+      const chatDiv = content.querySelector("#" + ROOT + "-chat-messages");
+      if (chatDiv) {
+        chatHistory.forEach(msg => {
+          const p = document.createElement("p");
+          p.style.margin = "2px 0";
+          p.innerHTML = `<strong>${msg.sender}:</strong> ${msg.text}`;
+          chatDiv.appendChild(p);
+        });
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+      }
+    }  // <-- no semicolon here
     content.querySelectorAll("[data-skin]").forEach(function(btn) { btn.addEventListener("click", function() { setSkin(btn.dataset.skin); }); });
     content.querySelectorAll("[data-action='pick-level']").forEach(function(btn) { btn.addEventListener("click", function() { pickLevelFile(); }); });
     content.querySelectorAll("[data-action='clear-level']").forEach(function(btn) { btn.addEventListener("click", function() { clearLevel(); }); });
@@ -1362,12 +1381,14 @@
       });
     });
 
-    
     content.querySelectorAll("[data-action='send-chat']").forEach(function(btn) {
       btn.addEventListener("click", function() {
         const input = content.querySelector("#" + ROOT + "-chat-input");
         const message = input.value.trim();
-        if (message && game.multiplayer.socket?.readyState === WebSocket.OPEN) {
+        if (!game.multiplayer.socket || game.multiplayer.socket.readyState !== 1) {
+          return;
+        }
+        if (message) {
           game.multiplayer.socket.send(JSON.stringify({ type: "chat", message }));
           input.value = "";
         }
@@ -1380,7 +1401,10 @@
         if (e.key === "Enter") {
           e.preventDefault();
           const message = chatInput.value.trim();
-          if (message && game.multiplayer.socket?.readyState === WebSocket.OPEN) {
+          if (!game.multiplayer.socket || game.multiplayer.socket.readyState !== 1) {
+            return;
+          }
+          if (message) {
             game.multiplayer.socket.send(JSON.stringify({ type: "chat", message }));
             chatInput.value = "";
           }
@@ -1560,6 +1584,7 @@
       });
     });
     content.querySelectorAll("[data-action='mp-leave']").forEach(function(btn) { btn.addEventListener("click", function() { disconnectMultiplayer(); openPanel("multi"); }); });
+    content.querySelectorAll("[data-action='open-chat']").forEach(function(btn) { btn.addEventListener("click", function() { openPanel("chat"); }); });
 
     
     content.querySelectorAll("[data-action='login']").forEach(function(btn) {
@@ -1890,13 +1915,13 @@
       say(`You killed ${message.targetName}!`);
       return;
     }
-
     if (message.type === "chat") {
+      chatHistory.push({ sender: message.senderName, text: message.message });
       const chatDiv = document.querySelector("#" + ROOT + "-chat-messages");
       if (chatDiv) {
         const p = document.createElement("p");
         p.style.margin = "2px 0";
-        p.innerHTML = `<strong>${message.senderName}:</strong> ${message.message}`;
+        p.innerHTML = "<strong>" + message.senderName + ":</strong> " + message.message;
         chatDiv.appendChild(p);
         chatDiv.scrollTop = chatDiv.scrollHeight;
       }
